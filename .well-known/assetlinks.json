@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "app.vercel.occhioaperto.twa",
+    "sha256_cert_fingerprints": ["DD:71:03:26:03:1C:98:8A:2D:A5:80:A2:02:25:BC:F3:72:9F:57:9D:BC:67:B3:5C:85:70:CB:86:C7:74:AF:16"]
+  }
+}]
