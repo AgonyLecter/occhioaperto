@@ -418,6 +418,7 @@ body.mobile:not(.portrait) .lc .chat form input{padding:6px 8px;font-size:12px}
     <button id="bEnds">Finali</button>
     <button id="bOpt">Opzioni</button>
     <button id="bCred">Crediti</button>
+    <button id="bQuit" class="hidden">Esci dal gioco</button>
   </nav>
   <div class="foot" id="mStats">connessione al server…</div>
   <div class="warn">USA LE CUFFIE<br>SPEGNI LA LUCE</div>
@@ -2349,6 +2350,7 @@ $('#bChap').onclick = () => {
   $('#chapList').querySelectorAll('.ch:not(.lock)').forEach(el => el.onclick = () => { if (!save.name) { $('#chapPanel').classList.add('hidden'); $('#bNew').click(); return; } SFX.click(); $('#chapPanel').classList.add('hidden'); $('#menu').classList.add('hidden'); netRegister(); playIntro(+el.dataset.n); });
   $('#chapPanel').classList.remove('hidden');
 };
+if (window.occhioDesktop) { const q = $('#bQuit'); q.classList.remove('hidden'); q.onclick = () => window.occhioDesktop.quit(); }
 $('#bCred').onclick = () => { initAudio(); $('#credPanel').classList.remove('hidden'); };
 
 /* =========================================================
