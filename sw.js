@@ -1,6 +1,6 @@
 /* Occhio Aperto — service worker: il gioco funziona anche offline. */
-const CACHE = 'occhio-aperto-v2';
-const CORE = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png',
+const CACHE = 'occhio-aperto-v3';
+const CORE = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './?source=pwa',
   'https://unpkg.com/three@0.160.0/build/three.module.js'];
 
 self.addEventListener('install', e => {
