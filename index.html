@@ -71,6 +71,7 @@ body.shake #os,body.shake #c{animation:shake .08s infinite}
 html,body{height:100dvh}
 #fsBtn{position:fixed;z-index:95;right:max(64px,calc(env(safe-area-inset-right) + 50px));top:12px;width:42px;height:42px;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(10,10,14,.55);color:#fff;font:700 18px Inter;display:none;align-items:center;justify-content:center;padding:0}
 body.mobile.canfs:not(.isfs) #fsBtn{display:flex}
+body:has(#os:not(.hidden)) #fsBtn{display:none}
 #rotate{position:fixed;inset:0;z-index:200;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:30px;text-align:center;font:500 15px/1.5 Inter;color:#ccc}
 #rotate .ph{width:44px;height:74px;border:3px solid #eee;border-radius:9px;animation:rot 2s ease-in-out infinite}
 @keyframes rot{0%,30%{transform:rotate(0)}60%,100%{transform:rotate(-90deg)}}
@@ -248,6 +249,23 @@ body.mobile .lc .chat{width:auto;height:38%;border-left:0;border-top:1px solid #
 body.mobile .lc .mainc{flex:none;padding:6px;gap:6px}
 body.mobile .lc .pad{display:flex}
 body.mobile .lc .prev{max-height:none}
+.lc .prev canvas{object-fit:contain}
+.lc .pad{position:absolute;left:10px;bottom:24px;z-index:2}
+.lc .pad button{width:42px;height:38px}
+.lc .pad button{background:rgba(30,30,42,.55);backdrop-filter:blur(3px);border:1px solid rgba(255,255,255,.15)}
+/* telefono in orizzontale: anteprima a sinistra, chat a destra, niente scroll */
+body.mobile:not(.portrait) .lc{flex-direction:row}
+body.mobile:not(.portrait) .lc .mainc{flex:1;min-height:0;padding:6px;gap:6px}
+body.mobile:not(.portrait) .lc .prev{flex:1;min-height:0;aspect-ratio:auto;height:auto}
+body.mobile:not(.portrait) .lc .ctrl{flex-wrap:nowrap;gap:6px}
+body.mobile:not(.portrait) .lc .ctrl input{display:none}
+body.mobile:not(.portrait) .lc .ctrl button{flex:1;padding:8px 6px;font-size:12px;white-space:nowrap}
+body.mobile:not(.portrait) .lc .stat{font-size:10.5px;gap:10px;flex-wrap:nowrap;overflow:hidden;white-space:nowrap}
+body.mobile:not(.portrait) .lc .chat{width:min(38%,300px);height:auto;border-top:0;border-left:1px solid #20202a}
+body.mobile:not(.portrait) .lc .chat .hd{padding:5px 10px;font-size:10px}
+body.mobile:not(.portrait) .lc .msgs{font-size:12px;padding:6px 8px}
+body.mobile:not(.portrait) .lc .chat form{padding:5px;gap:5px}
+body.mobile:not(.portrait) .lc .chat form input{padding:6px 8px;font-size:12px}
 
 /* MENU */
 #menu{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;justify-content:center;padding:0 max(7vw,24px);background:linear-gradient(90deg,rgba(0,0,0,.92) 0%,rgba(0,0,0,.6) 45%,rgba(0,0,0,.1) 100%)}
@@ -343,7 +361,7 @@ body.mobile .lc .prev{max-height:none}
 
 <div id="phone" class="hidden">
   <div class="island"></div>
-  <div class="sb"><span id="phClock">21:04</span><span>▂▄▆ 5G 🔋</span></div>
+  <div class="sb"><span id="phClock"></span><span>▂▄▆ 5G <span id="phBatt">🔋</span></span></div>
   <div class="scr" id="phScr"></div>
   <div class="bar"><button id="phTorch">🔦 Torcia</button><button id="phClose">Chiudi</button></div>
 </div>
@@ -470,6 +488,30 @@ import * as THREE from 'three';
 const $ = s => document.querySelector(s);
 const isTouch = matchMedia('(pointer:coarse)').matches || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
 if (isTouch) document.body.classList.add('mobile');
+/* ---- dati VERI del giocatore (nessun permesso richiesto) ---- */
+const REAL = (() => {
+  const ua = navigator.userAgent, p2 = n => String(n).padStart(2, '0');
+  const os = /iPhone/.test(ua) ? 'iPhone' : /iPad/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) ? 'iPad' : /Android/.test(ua) ? 'Android' : /Windows/.test(ua) ? 'Windows' : /Mac OS X/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux' : 'sconosciuto';
+  const br = /Edg\//.test(ua) ? 'Edge' : /OPR\//.test(ua) ? 'Opera' : /SamsungBrowser/.test(ua) ? 'Samsung Internet' : /Firefox|FxiOS/.test(ua) ? 'Firefox' : /Chrome|CriOS/.test(ua) ? 'Chrome' : /Safari/.test(ua) ? 'Safari' : 'browser';
+  const R = {
+    os, br, tz: (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { return ''; } })(),
+    batt: null, charging: null, start: new Date(),
+    now: () => new Date(),
+    hm: (d = new Date()) => `${p2(d.getHours())}:${p2(d.getMinutes())}`,
+    dmy: (d = new Date()) => `${p2(d.getDate())}/${p2(d.getMonth() + 1)}/${d.getFullYear()}`,
+    dm: (d = new Date()) => d.toLocaleDateString('it-IT', { day: 'numeric', month: 'long' }),
+    long: (d = new Date()) => d.toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' }),
+    ago: (days, h, m) => { const d = new Date(); d.setDate(d.getDate() - days); if (h != null) d.setHours(h, m || 0, 0, 0); return d; },
+    yearAgo: (days) => { const d = new Date(); d.setDate(d.getDate() - days); d.setFullYear(d.getFullYear() - 1); return d; },
+    mbps: () => { const c = navigator.connection; return c && c.downlink ? Math.max(1, Math.round(c.downlink)) : null; },
+    netType: () => { const c = navigator.connection; return c && c.type === 'wifi' ? 'Wi-Fi' : c && c.type === 'cellular' ? 'rete mobile' : null; },
+    cores: navigator.hardwareConcurrency || null,
+  };
+  R.device = os === 'sconosciuto' ? br : `${os} · ${br}`;
+  R.liveAt = () => { const d = new Date(R.start.getTime() + 26 * 60000); return R.hm(d); };
+  try { navigator.getBattery && navigator.getBattery().then(b => { const u = () => { R.batt = Math.round(b.level * 100); R.charging = b.charging; }; u(); b.addEventListener('levelchange', u); b.addEventListener('chargingchange', u); }).catch(() => { }); } catch (e) { }
+  return R;
+})();
 const wait = ms => new Promise(r => setTimeout(r, ms));
 const rand = (a, b) => a + Math.random() * (b - a);
 const pick = a => a[Math.floor(Math.random() * a.length)];
@@ -640,8 +682,8 @@ function posterTex(kind) {
       g.fillStyle = '#ff2a4a'; g.font = 'bold 52px sans-serif'; g.textAlign = 'center'; g.fillText('LIVE', 128, 170); g.font = 'bold 22px sans-serif'; g.fillStyle = '#c9a0ff'; g.shadowColor = '#9b5cff'; g.fillText('EVERY NIGHT', 128, 210);
       g.beginPath(); g.arc(128, 270, 22, 0, 7); g.fillStyle = '#ff2a4a'; g.fill();
     } else if (kind === 'calendar') {
-      g.fillStyle = '#eee8dc'; g.fillRect(0, 0, w, h); g.fillStyle = '#b22'; g.fillRect(0, 0, w, 60); g.fillStyle = '#fff'; g.font = 'bold 30px sans-serif'; g.textAlign = 'center'; g.fillText('NOVEMBRE 2026', 128, 42);
-      g.fillStyle = '#333'; g.font = '16px sans-serif'; let d = 1; const start = 6; for (let r = 0; r < 6; r++) for (let c = 0; c < 7; c++) { const i = r * 7 + c; if (i < start || d > 30) continue; const x = 22 + c * 35, y = 100 + r * 45; g.fillText(d, x + 10, y); if (d === 17) { g.strokeStyle = '#d00'; g.lineWidth = 3; g.beginPath(); g.ellipse(x + 10, y - 6, 17, 14, 0, 0, 7); g.stroke(); g.fillStyle = '#d00'; g.font = 'bold 13px cursive'; g.fillText('PRIMA LIVE!!', 128, 375); g.fillStyle = '#333'; g.font = '16px sans-serif'; } d++; }
+      g.fillStyle = '#eee8dc'; g.fillRect(0, 0, w, h); g.fillStyle = '#b22'; g.fillRect(0, 0, w, 60); g.fillStyle = '#fff'; g.font = 'bold 30px sans-serif'; g.textAlign = 'center'; const T0 = new Date(), MM = T0.getMonth(), YY = T0.getFullYear(), TD = T0.getDate(), ND = new Date(YY, MM + 1, 0).getDate(); g.fillText(T0.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' }).toUpperCase(), 128, 42);
+      g.fillStyle = '#333'; g.font = '16px sans-serif'; let d = 1; const start = (new Date(YY, MM, 1).getDay() + 6) % 7; for (let r = 0; r < 6; r++) for (let c = 0; c < 7; c++) { const i = r * 7 + c; if (i < start || d > ND) continue; const x = 22 + c * 35, y = 100 + r * 45; g.fillText(d, x + 10, y); if (d === TD - 1) { g.strokeStyle = 'rgba(60,60,60,.55)'; g.lineWidth = 1.5; g.beginPath(); g.ellipse(x + 10, y - 6, 16, 13, .2, 0, 7); g.stroke(); } if (d === TD) { g.strokeStyle = '#d00'; g.lineWidth = 3; g.beginPath(); g.ellipse(x + 10, y - 6, 17, 14, 0, 0, 7); g.stroke(); g.fillStyle = '#d00'; g.font = 'bold 13px cursive'; g.fillText('PRIMA LIVE!!', 128, 375); g.fillStyle = '#333'; g.font = '16px sans-serif'; } d++; }
     } else if (kind === 'painting') {
       g.fillStyle = '#1a1612'; g.fillRect(0, 0, w, h); const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#2b3247'); gr.addColorStop(1, '#0d0d12'); g.fillStyle = gr; g.fillRect(20, 20, w - 40, h - 40);
       g.fillStyle = '#0a0a0c'; g.fillRect(60, 160, 140, 180); g.beginPath(); g.moveTo(50, 165); g.lineTo(130, 100); g.lineTo(210, 165); g.fill();
@@ -922,7 +964,7 @@ function buildWorld() {
   inspect(fridge, 'fridge', 'Frigorifero', ['Due birre, mezzo limone e il sugo della mamma. Cena da campioni.', 'Sul frigo, un magnete con la scritta "SORRIDI, TI STANNO GUARDANDO". Regalo di Leo, probabilmente.', 'Il frigorifero ronzava. Poi smise. Poi ricominciò. Come qualcuno che si accorge di essere ascoltato.']);
   col(9.28, 0.77, 9.97, 1.43);
   const cal = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.52), std(0xffffff, .8, 0, { map: posterTex('calendar') })); cal.position.set(9.93, 1.6, 2.1); cal.rotation.y = -Math.PI / 2; scene.add(cal);
-  inspect(cal, 'calendar', 'Calendario', ['17 novembre, cerchiato in rosso: PRIMA LIVE!!', 'Il 16 novembre era cerchiato anche lui. Ma non da te. Accanto, a matita: "un anno".']);
+  inspect(cal, 'calendar', 'Calendario', [`${REAL.dm()}, cerchiato in rosso: PRIMA LIVE!!`, `Il ${REAL.dm(REAL.ago(1))} era cerchiato anche lui. Ma non da te. Accanto, a matita: "un anno".`]);
   // TV
   const tvC = document.createElement('canvas'); tvC.width = 128; tvC.height = 72; W.tvC = tvC; W.tvTex = new THREE.CanvasTexture(tvC); W.tvOn = false;
   const tvG = tvC.getContext('2d'); tvG.fillStyle = '#020203'; tvG.fillRect(0, 0, 128, 72);
@@ -1052,7 +1094,7 @@ function renderWebcam() {
 function snapshot(cam, w = 320, h = 240) {
   const rt = new THREE.WebGLRenderTarget(w, h), buf = new Uint8Array(w * h * 4), c = document.createElement('canvas'); c.width = w; c.height = h; const ctx = c.getContext('2d'); const img = ctx.createImageData(w, h);
   readCam(cam, rt, buf, img, ctx, w, h, 30, [1, .95, .85]); rt.dispose();
-  ctx.font = '16px VT323'; ctx.fillStyle = '#ffb400'; ctx.fillText('14/11/2026  03:11', 10, h - 12);
+  ctx.font = '16px VT323'; ctx.fillStyle = '#ffb400'; ctx.fillText(`${REAL.dmy(REAL.ago(3))}  03:11`, 10, h - 12);
   return c.toDataURL('image/jpeg', .85);
 }
 
@@ -1076,7 +1118,7 @@ const P = { x: 2.2, z: 2.9, yaw: 0, pitch: 0, bob: 0, stepAcc: 0, vx: 0, vz: 0 }
 const KEYS = {};
 const VIS = { current: null, models: {}, knockT: 0, knocks: 0, handling: false };
 let gameMinutes = 21 * 60 + 4;
-const gameClockStr = () => { const m = Math.floor(gameMinutes); return `${String(Math.floor(m / 60) % 24).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`; };
+const gameClockStr = () => REAL.hm(); // l'ora del gioco è l'ora vera del giocatore
 
 /* ---------- sottotitoli ---------- */
 const SUB = { q: [], busy: false, iv: null };
@@ -1277,7 +1319,7 @@ function bootOS() {
 }
 function showLock() {
   const days = ['domenica', 'lunedì', 'martedì', 'mercoledì', 'giovedì', 'venerdì', 'sabato'];
-  scr.innerHTML = `<div id="lock" class="osfull"><div class="big">${gameClockStr()}</div><div class="date">martedì 17 novembre</div><div class="tap">tocca o premi un tasto per sbloccare</div>
+  scr.innerHTML = `<div id="lock" class="osfull"><div class="big">${gameClockStr()}</div><div class="date">${REAL.long()}</div><div class="tap">tocca o premi un tasto per sbloccare</div>
    <div class="card"><div class="uav">${esc(NAME()[0].toUpperCase())}</div><div class="uname">${esc(NAME())}</div><input id="pin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN"><div class="err" id="pinErr"></div></div></div>`;
   const lock = $('#lock');
   const go = () => { if (lock.classList.contains('login')) return; lock.classList.add('login'); SFX.click(); setTimeout(() => $('#pin').focus(), 50); };
@@ -1296,13 +1338,13 @@ function showDesk() {
   scr.innerHTML = `<div id="desk" class="osfull ${STREAM.phase >= 3 ? 'dark' : ''}"><div id="icons"></div><div id="wins"></div><div id="startmenu"></div>
    <div id="taskbar"><div class="tb" id="tbStart"><div class="flogo" style="width:20px;height:20px"><i style="width:9px;height:9px;border-radius:2px"></i><i style="width:9px;height:9px;border-radius:2px"></i><i style="width:9px;height:9px;border-radius:2px"></i><i style="width:9px;height:9px;border-radius:2px"></i></div></div>
    <div class="tb" data-a="livecast">🔴</div><div class="tb" data-a="files">📁</div><div class="tb" data-a="browser">🌐</div><div class="tb" data-a="notes">📝</div>
-   <div class="tray"><span>📶 🔊</span><span id="osClock">${gameClockStr()}<br>17/11/2026</span></div></div></div>`;
+   <div class="tray"><span>📶 🔊</span><span id="osClock">${gameClockStr()}<br>${REAL.dmy()}</span></div></div></div>`;
   OS.wins = {}; OS.lc = null; OS.lcVisible = false;
   renderIcons();
   scr.querySelectorAll('#taskbar [data-a]').forEach(el => el.onclick = () => { SFX.click(); APPS[el.dataset.a].open(); });
   $('#tbStart').onclick = () => { SFX.click(); const sm = $('#startmenu'); sm.classList.toggle('on'); sm.innerHTML = `<div style="font:600 12px Inter;color:#aaa">Aggiunte</div><div class="apps">${Object.entries(APPS).filter(([k]) => k !== 'leo' || F.usb).map(([k, a]) => `<div data-a="${k}"><span>${a.i}</span>${a.n}</div>`).join('')}</div><div class="foot"><span>👤 ${esc(NAME())}</span><button title="Alzati" id="smOff">⏻</button></div>`; sm.querySelectorAll('[data-a]').forEach(el => el.onclick = () => { sm.classList.remove('on'); APPS[el.dataset.a].open(); }); $('#smOff').onclick = () => { sm.classList.remove('on'); closePC(); }; };
   if (STREAM.live || F.lcWasOpen) openLivecast();
-  if (!F.firstDesk) { F.firstDesk = true; setTimeout(() => osNotify('LIVEcast', 'La tua diretta "Prima live!! ABYSS RUN" è programmata per le 21:30.'), 900); }
+  if (!F.firstDesk) { F.firstDesk = true; setTimeout(() => osNotify('LIVEcast', 'La tua diretta "Prima live!! ABYSS RUN" è programmata per le ' + REAL.liveAt() + '.'), 900); }
 }
 function renderIcons() { const ic = $('#icons'); if (!ic) return; ic.innerHTML = Object.entries(APPS).filter(([k]) => k !== 'leo' || F.usb).map(([k, a]) => `<div class="ico" data-a="${k}"><div class="g" style="background:${a.bg}">${a.i}</div>${a.n}</div>`).join(''); ic.querySelectorAll('.ico').forEach(el => el.onclick = () => { SFX.click(); APPS[el.dataset.a].open(); }); }
 function osNotify(title, text) { if (!OS.open) return; const n = document.createElement('div'); n.className = 'osnotif'; n.innerHTML = `<b>${esc(title)}</b>${esc(text)}`; scr.appendChild(n); SFX.osping(); setTimeout(() => n.remove(), 5200); }
@@ -1328,7 +1370,7 @@ function winOpen(id, title, icon, w, h, html) {
 function FS() {
   const fs = {
     'Documenti': [
-      { n: 'checklist_live.txt', t: `CHECKLIST PRIMA LIVE\n\n[x] PIN pc: 1711 (cambiarlo!!!)\n[x] scena: ABYSS RUN\n[ ] togliere il nastro dalla webcam\n[ ] NON leggere la chat ad alta voce\n[ ] 21:30 → LIVE\n[ ] ricordarsi di respirare` },
+      { n: 'checklist_live.txt', t: `CHECKLIST PRIMA LIVE\n\n[x] PIN pc: 1711 (cambiarlo!!!)\n[x] scena: ABYSS RUN\n[ ] togliere il nastro dalla webcam\n[ ] NON leggere la chat ad alta voce\n[ ] ${REAL.liveAt()} → LIVE\n[ ] ricordarsi di respirare` },
       { n: 'contratto_affitto.txt', t: `CONTRATTO DI LOCAZIONE — via dei Gelsi 14, int. 7\nLocatore: Fernanda Ferri\nConduttore: ${NAME()}\n\nArt. 4 — L'immobile viene consegnato arredato, comprensivo di computer fisso.\nArt. 9 — Il conduttore si impegna a non coprire in alcun modo la finestra.\nArt. 9-bis — Né le altre finestre.\nArt. 12 — Il locatore conserva una copia delle chiavi.` },
       { n: 'bio_canale.txt', t: `Ciao! Sono ${NAME()} 👋\nStreammo horror e roguelike quasi tutte le notti.\nChat gentile = chat felice.\nSe vedi qualcosa dietro di me, non dirmelo. 😅` },
     ],
@@ -1341,7 +1383,7 @@ function FS() {
 }
 function spectatorsTxt() {
   const real = NET.names.slice(0, 12); const fake = FALLBACK_NAMES.slice(0, 14 - real.length);
-  return `SPETTATORI — sessione del 16/11/2025 (leo_live)\n---------------------------------\nmarco_mod\nnotte_fonda\npixelmorto\ninsonne_88\n${OCC}\n\nleo_live ← ultimo accesso: 16/11/2025 03:11\n\n\nSPETTATORI — sessione del 17/11/2026\n---------------------------------\n${[...real, ...fake].join('\n')}\n${OCC}\n\n${NAME()} ← sei qui`;
+  return `SPETTATORI — sessione del ${REAL.dmy(REAL.yearAgo(1))} (leo_live)\n---------------------------------\nmarco_mod\nnotte_fonda\npixelmorto\ninsonne_88\n${OCC}\n\nleo_live ← ultimo accesso: ${REAL.dmy(REAL.yearAgo(1))} 03:11\n\n\nSPETTATORI — sessione del ${REAL.dmy()}\n---------------------------------\n${[...real, ...fake].join('\n')}\n${OCC}\n\n${NAME()} ← sei qui`;
 }
 function openFiles(path) {
   const el = winOpen('files', 'Esplora file', '📁', 640, 400, `<div class="ex"><div class="side"></div><div class="main"></div></div>`); if (!el) return;
@@ -1355,7 +1397,7 @@ function openFiles(path) {
 function openText(n, t) { const el = winOpen('txt_' + n, n + ' — Note', '📝', 480, 380, `<textarea class="np" readonly></textarea>`); if (el) el.querySelector('textarea').value = t; }
 function openImage(n) {
   if (!OS.snap) OS.snap = snapshot(snapCam);
-  const el = winOpen('img', n, '🖼️', 520, 440, `<div style="height:100%;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:10px"><img src="${OS.snap}" style="max-width:100%;max-height:85%;image-rendering:pixelated"><div style="font:12px Inter;color:#888">Scattata il 14/11/2026 alle 03:11 · Dispositivo: sconosciuto</div></div>`);
+  const el = winOpen('img', n, '🖼️', 520, 440, `<div style="height:100%;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:10px"><img src="${OS.snap}" style="max-width:100%;max-height:85%;image-rendering:pixelated"><div style="font:12px Inter;color:#888">Scattata il ${REAL.dmy(REAL.ago(3))} alle 03:11 · Dispositivo: ${esc(REAL.device)}</div></div>`);
   if (!F.sawImg) { F.sawImg = true; SFX.sting(); setTimeout(() => osNotify('Sistema', 'Foto sincronizzata da un dispositivo non registrato.'), 1500); }
 }
 function openNotes() { const el = winOpen('notes', 'Note', '📝', 420, 360, `<textarea class="np" spellcheck="false"></textarea>`); if (!el) return; const ta = el.querySelector('textarea'); ta.value = save.notes || `cose da dire in live:\n- ringraziare marco (mod)\n- salutare la mamma (ci guarda di sicuro)\n- NON parlare della finestra di fronte\n`; ta.oninput = () => { save.notes = ta.value; persist(); SFX.type(); }; ta.onkeydown = e => e.stopPropagation(); }
@@ -1369,12 +1411,12 @@ function openBrowser(page, q) {
   const forumUsers = [...NET.names.slice(0, 5), 'notte_fonda', 'insonne_88', 'gattoNero', 'luce_spenta'];
   const PAGES = {
     home: [`orbita://home`, `<div class="search"><div class="lg">orbita</div><input id="bq" placeholder="Cerca nel web o digita un indirizzo"></div>
-      <div class="card"><b data-l="news">Streamer scomparso in via dei Gelsi: la porta era chiusa dall'interno</b><span>Cronaca locale · 18/11/2025</span></div>
+      <div class="card"><b data-l="news">Streamer scomparso in via dei Gelsi: la porta era chiusa dall'interno</b><span>Cronaca locale · ${REAL.dmy(REAL.yearAgo(-1))}</span></div>
       <div class="card"><b data-l="forum">[CreepyNet] occhio_aperto — qualcuno l'ha mai visto in chat?</b><span>Forum · 214 risposte · ultimo messaggio: 3 minuti fa</span></div>
       <div class="card"><b data-l="meteo">Allerta meteo: pioggia intensa per tutta la notte</b><span>Meteo · oggi</span></div>
       <div class="card"><b data-l="lc">LIVEcast supera i 40 milioni di utenti. Il motto: «la diretta non si spegne mai»</b><span>Tecnologia · ieri</span></div>`],
-    news: [`orbita://cronaca/streamer-scomparso`, `<h1>Streamer scomparso in via dei Gelsi: la porta era chiusa dall'interno</h1><div class="meta">Cronaca locale · 18 novembre 2025</div>
-      <p>Di Leonardo R., 24 anni, conosciuto online come <b>leo_live</b>, non si hanno notizie dalla notte tra il 16 e il 17 novembre. L'ultima traccia è la sua diretta, iniziata alle 21:30 e mai interrotta.</p>
+    news: [`orbita://cronaca/streamer-scomparso`, `<h1>Streamer scomparso in via dei Gelsi: la porta era chiusa dall'interno</h1><div class="meta">Cronaca locale · ${REAL.dm(REAL.yearAgo(-1))} ${REAL.yearAgo(-1).getFullYear()}</div>
+      <p>Di Leonardo R., 24 anni, conosciuto online come <b>leo_live</b>, non si hanno notizie dalla notte tra il ${REAL.dm(REAL.yearAgo(1))} e il ${REAL.dm(REAL.yearAgo(0))}. L'ultima traccia è la sua diretta, iniziata alle 21:30 e mai interrotta.</p>
       <p>Secondo gli spettatori, intorno alle 3:11 il ragazzo avrebbe smesso di giocare, guardato fisso nella webcam per diversi minuti e detto soltanto: <i>«adesso vi vedo»</i>. Poi si sarebbe alzato. La trasmissione è proseguita per altre sei ore, inquadrando la stanza vuota.</p>
       <p>La proprietaria dell'immobile, F. F., ha dichiarato di aver trovato la porta chiusa a chiave, con le chiavi inserite nella serratura dal lato interno. Le finestre erano chiuse.</p>
       <p>Diversi utenti hanno segnalato la presenza in chat di un account, <b>occhio_aperto</b>, che durante la diretta avrebbe descritto «cose che solo qualcuno nella stanza poteva sapere». La piattaforma afferma che l'account non risulta nei propri registri.</p><p><a data-l="forum">Discussione sul forum →</a></p>`],
@@ -1405,9 +1447,8 @@ function openBrowser(page, q) {
 }
 /* ---- LIVEcast ---- */
 function openLivecast() {
-  const el = winOpen('lc', 'LIVEcast Studio', '🔴', 940, 540, `<div class="lc"><div class="mainc"><div class="prev"><div class="badge">OFFLINE</div><div class="vw">👁 0</div></div>
+  const el = winOpen('lc', 'LIVEcast Studio', '🔴', 940, 540, `<div class="lc"><div class="mainc"><div class="prev"><div class="badge">OFFLINE</div><div class="vw">👁 0</div><div class="pad"><button data-k="a">◀</button><button data-k="w">▲</button><button data-k="s">▼</button><button data-k="d">▶</button></div></div>
      <div class="ctrl"><input class="ti" value="PRIMA LIVE!! ABYSS RUN fino all'alba 🔴" spellcheck="false"><button class="go">● Vai in diretta</button><button class="brb">⏸ BRB</button><button class="cam">📷 Webcam</button><button class="end">■ Termina</button></div>
-     <div class="pad"><button data-k="a">◀</button><button data-k="w">▲</button><button data-k="s">▼</button><button data-k="d">▶</button></div>
      <div class="stat"></div></div>
      <div class="chat"><div class="hd">CHAT DELLA DIRETTA</div><div class="msgs"></div><form><input placeholder="Scrivi in chat…" maxlength="120"><button>➤</button></form></div></div>`);
   if (!el) return;
@@ -1422,8 +1463,9 @@ function openLivecast() {
   OS.lc.cam.onclick = () => { SFX.click(); STREAM.view = STREAM.view === 'cam' ? 'game' : 'cam'; };
   OS.lc.end.onclick = () => endLive();
   el.querySelectorAll('.pad button').forEach(b => { const k = b.dataset.k; b.onpointerdown = () => GAME.keys[k] = true; b.onpointerup = b.onpointerleave = () => GAME.keys[k] = false; });
-  lcCanvas.onpointerdown = e => { const r = lcCanvas.getBoundingClientRect(); GAME.target = { x: (e.clientX - r.left) / r.width * 480, y: (e.clientY - r.top) / r.height * 270 }; };
-  lcCanvas.onpointermove = e => { if (!GAME.target || !e.buttons) return; const r = lcCanvas.getBoundingClientRect(); GAME.target = { x: (e.clientX - r.left) / r.width * 480, y: (e.clientY - r.top) / r.height * 270 }; };
+  const lcPt = e => { const r = lcCanvas.getBoundingClientRect(), k = Math.min(r.width / 480, r.height / 270), ox = (r.width - 480 * k) / 2, oy = (r.height - 270 * k) / 2; return { x: clamp((e.clientX - r.left - ox) / k, 0, 480), y: clamp((e.clientY - r.top - oy) / k, 0, 270) }; };
+  lcCanvas.onpointerdown = e => { GAME.target = lcPt(e); };
+  lcCanvas.onpointermove = e => { if (!GAME.target || !e.buttons) return; GAME.target = lcPt(e); };
   lcCanvas.onpointerup = () => GAME.target = null;
   const form = el.querySelector('form'), inp = form.querySelector('input');
   inp.onkeydown = e => e.stopPropagation();
@@ -1437,7 +1479,7 @@ function updateLC() {
   L.go.style.display = STREAM.live ? 'none' : ''; L.brb.style.display = STREAM.live ? '' : 'none'; L.end.style.display = STREAM.live ? '' : 'none';
   L.brb.textContent = STREAM.brb ? '▶ Riprendi' : '⏸ BRB';
   const ok = (b, t, f) => `<span>${t}: <b class="${b ? '' : 'bad'}">${b ? '✓ ' + (f || 'ok') : '✗ ' + (f || 'errore')}</b></span>`;
-  L.stat.innerHTML = ok(true, 'Microfono', 'HyperMic') + ok(!F.tapeOn, 'Webcam', F.tapeOn ? 'nessun segnale' : 'CAM-01') + ok(true, 'Rete', '38 Mbps') + (STREAM.live ? `<span>Durata: <b>${Math.floor(STREAM.t / 60)}:${String(Math.floor(STREAM.t % 60)).padStart(2, '0')}</b></span>` : '');
+  L.stat.innerHTML = ok(true, 'Microfono', 'HyperMic') + ok(!F.tapeOn, 'Webcam', F.tapeOn ? 'nessun segnale' : 'CAM-01') + ok(true, 'Rete', (REAL.mbps() || 38) + ' Mbps') + (STREAM.live ? `<span>Durata: <b>${Math.floor(STREAM.t / 60)}:${String(Math.floor(STREAM.t % 60)).padStart(2, '0')}</b></span>` : '');
 }
 async function goLive() {
   SFX.click();
@@ -1562,8 +1604,12 @@ async function chapter1(T) {
   setObjective('');
   const n = NAME();
   await T.wait(800); fadeIn();
-  if (save.runs > 1) await T.say(`Di nuovo qui, ${n}? Il narratore si ricorda di te. Anche qualcun altro.`, { glitch: true });
-  await T.say(`Erano le 21:04 del 17 novembre quando ${n} si svegliò dal pisolino del pomeriggio. Mancava mezz'ora alla prima vera diretta della sua vita.`);
+  if (save.runs > 1) {
+    const gap = save.prevPlay ? Math.floor((Date.now() - save.prevPlay) / 86400000) : null;
+    const quando = gap == null ? '' : gap === 0 ? ' Sei andato via oggi stesso.' : gap === 1 ? ' Eri qui ieri.' : ` Sono passati ${gap} giorni. Lui li ha contati.`;
+    await T.say(`Di nuovo qui, ${n}? Il narratore si ricorda di te.${quando} Anche qualcun altro.`, { glitch: true });
+  }
+  await T.say(`Erano le ${REAL.hm()} del ${REAL.dm()} quando ${n} si svegliò da un pisolino. Mancava mezz'ora alla prima vera diretta della sua vita.`);
   await T.say('Il PC era sulla scrivania, come sempre. Acceso. Aspettava.');
   setObjective('Accendi il PC sulla scrivania');
   $('#hint').textContent = isTouch ? 'Joystick per muoverti · trascina a destra per guardarti intorno · USA per interagire' : 'Clicca per guardarti intorno · WASD per muoverti · E per interagire · Tab telefono · F torcia';
@@ -1617,7 +1663,12 @@ async function live1(T) {
   chatPost(OCC, `stasera hai guardato la porta d'ingresso ${S.doorLooks} ${S.doorLooks === 1 ? 'volta' : 'volte'}. aspetti qualcuno?`);
   await T.wait(4000);
   const d = new Date(); const hh = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-  chatPost(OCC, `lì da te sono le ${hh}. ${isTouch ? 'stai giocando dal telefono. sei a letto? ti si sta scaricando.' : 'hai una mano sul mouse e l\'altra vicino alla tastiera. lo so.'}`);
+  const devTxt = REAL.os === 'iPhone' ? 'da un iPhone' : REAL.os === 'Android' ? 'da un Android' : REAL.os === 'iPad' ? 'da un iPad' : REAL.os === 'sconosciuto' ? '' : 'da ' + REAL.os;
+  const battTxt = REAL.batt == null ? (isTouch ? 'sei a letto? ti si sta scaricando.' : '') : REAL.charging ? `sei al ${REAL.batt}%. almeno l'hai attaccato al caricatore. così non scappi.` : REAL.batt < 30 ? `sei al ${REAL.batt}%. quando arrivi a zero, resti qui con me.` : `sei al ${REAL.batt}%. abbiamo tutto il tempo.`;
+  chatPost(OCC, `lì da te sono le ${hh}. ${isTouch ? `stai giocando ${devTxt || 'dal telefono'}. ${battTxt}` : `stai giocando ${devTxt || 'dal pc'}, con ${REAL.br}. hai una mano sul mouse e l'altra vicino alla tastiera. lo so.`}`);
+  const H = d.getHours();
+  if (H >= 6 && H < 19) { await T.wait(2600); chatPost(OCC, 'da te è ancora giorno. qui è sempre notte. tra poco anche lì.'); }
+  else if (H >= 0 && H < 5) { await T.wait(2600); chatPost(OCC, `le ${hh}. domani hai sonno. ma tanto domani non c'è.`); }
   await T.wait(1200); SFX.whisper();
   await T.say('Il narratore non ha scritto quella riga. Il narratore vorrebbe che fosse chiaro.', { glitch: true });
   await T.wait(1000); chatPost('marco_mod', 'ok basta. bannato.');
@@ -1852,7 +1903,7 @@ $('#nameOk').onclick = () => {
 async function playIntro() {
   const el = $('#intro'), t = el.querySelector('.t'); el.classList.remove('hidden'); $('#skip').classList.remove('hidden');
   let skipped = false; $('#skip').onclick = () => { skipped = true; };
-  const lines = ['17 novembre 2026.', 'Tre settimane fa ti sei trasferito in via dei Gelsi 14, interno 7. Un bilocale arredato, a un prezzo troppo basso per farsi domande.', 'Fai lo streamer. La chat è il tuo lavoro, la tua compagnia, il tuo pubblico.', 'Stanotte farai la tua prima vera diretta.', 'Qualcuno, stanotte, ti guarderà più degli altri.'];
+  const lines = [`${REAL.dm()} ${REAL.now().getFullYear()}.`, 'Tre settimane fa ti sei trasferito in via dei Gelsi 14, interno 7. Un bilocale arredato, a un prezzo troppo basso per farsi domande.', 'Fai lo streamer. La chat è il tuo lavoro, la tua compagnia, il tuo pubblico.', 'Stanotte farai la tua prima vera diretta.', 'Qualcuno, stanotte, ti guarderà più degli altri.'];
   for (const l of lines) { if (skipped) break; t.textContent = ''; for (let i = 0; i <= l.length && !skipped; i++) { t.textContent = l.slice(0, i); if (i % 3 === 0) SFX.type(); await wait(32); } await wait(1600); }
   if (!skipped) { t.innerHTML = `<div class="chap"><small>CAPITOLO 1</small>In Diretta</div>`; SFX.sting(); await wait(2600); }
   el.classList.add('hidden'); $('#skip').classList.add('hidden'); startGame();
@@ -1870,7 +1921,7 @@ function resetWorld() {
 }
 function startGame() {
   if (RUN) RUN.kill(); clearSubs(); resetWorld();
-  save.runs++; persist(); netProgress({ runs: save.runs, last: Date.now() });
+  save.prevPlay = save.lastPlay || null; save.lastPlay = Date.now(); save.runs++; persist(); netProgress({ runs: save.runs, last: Date.now() });
   $('#menu').classList.add('hidden'); $('#hud').classList.remove('hidden'); if (isTouch) $('#mobile').classList.remove('hidden');
   $('#hint').style.opacity = 1; $('#hint').textContent = '';
   $('#fade').style.transition = 'none'; $('#fade').style.opacity = 1;
@@ -1942,7 +1993,7 @@ function update(dt) {
   if (needCam && frame % (HIGH ? 2 : 3) === 0) renderWebcam();
   if ((OS.lc || STREAM.live) && frame % 2 === 0) drawPreview(dt * 2);
   monT -= dt; if (monT <= 0) { monT = 0.25; drawMonitors(); }
-  if (frame % 30 === 0) { $('#clock').textContent = gameClockStr(); const oc = $('#osClock'); if (oc) oc.innerHTML = `${gameClockStr()}<br>17/11/2026`; }
+  if (frame % 30 === 0) { $('#clock').textContent = gameClockStr(); const oc = $('#osClock'); if (oc) oc.innerHTML = `${gameClockStr()}<br>${REAL.dmy()}`; const pb = $('#phBatt'); if (pb) pb.textContent = REAL.batt != null ? `${REAL.charging ? '⚡' : '🔋'}${REAL.batt}%` : '🔋'; }
   // occhio nel menu segue il mouse
 }
 function drawMonitors() {
@@ -1992,6 +2043,18 @@ buildWorld(); collectRayTargets(); resetWorld();
 renderer.compile(scene, camera);
 $('#loading').classList.add('hidden');
 mode = 'menu'; toMenu(); updateMenuStats();
+/* se il giocatore lascia la pagina, qualcuno se ne accorge */
+let awayAt = 0;
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) { awayAt = Date.now(); return; }
+  const sec = Math.round((Date.now() - awayAt) / 1000); if (!awayAt || sec < 6 || mode === 'menu' || !RUN) return; awayAt = 0;
+  const t = sec < 90 ? `${sec} secondi` : `${Math.round(sec / 60)} minuti`;
+  setTimeout(() => {
+    if (STREAM.live && STREAM.occ) chatPost(OCC, pick([`dove sei andato per ${t}? io sono rimasto qui. a guardare la stanza.`, `${t}. la stanza è stata vuota per ${t}. quasi.`, `bentornato. mentre non c'eri ho spostato una cosa. trovala.`]));
+    else if (STREAM.live) chatPost(pick(chatNames()), pick(['ah è tornato', `${NAME()} sei sparito per ${t}`, 'pensavo fosse crashata la live']));
+    else say(`${NAME()} è stato via ${t}. Il narratore ha aspettato. Il narratore non è l'unico.`, { glitch: sec > 60 });
+  }, 900);
+});
 initNet();
 document.addEventListener('pointerdown', () => initAudio(), { once: true });
 loop();
