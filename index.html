@@ -8,6 +8,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Occhio Aperto">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>OCCHIO APERTO — Capitolo 1: In Diretta</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;800&family=Special+Elite&family=VT323&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
@@ -62,7 +65,31 @@ body.shake #os,body.shake #c{animation:shake .08s infinite}
 #look{position:absolute;right:0;top:0;width:58%;height:100%;pointer-events:auto}
 #joy{position:absolute;left:max(22px,env(safe-area-inset-left));bottom:30px;width:136px;height:136px;border-radius:50%;border:2px solid rgba(255,255,255,.18);background:radial-gradient(circle,rgba(255,255,255,.07),rgba(255,255,255,.02));pointer-events:auto}
 #joyKnob{position:absolute;left:50%;top:50%;width:56px;height:56px;margin:-28px;border-radius:50%;background:rgba(255,255,255,.22);border:1px solid rgba(255,255,255,.4)}
-.mbtn{position:absolute;pointer-events:auto;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(10,10,14,.45);color:#fff;font:800 12px Inter;width:58px;height:58px;backdrop-filter:blur(4px)}
+.mbtn{position:absolute;pointer-events:auto;border-radius:50%;border:1.5px solid rgba(255,255,255,.28);background:radial-gradient(circle at 35% 30%,rgba(255,255,255,.12),rgba(10,10,14,.55) 70%);color:#f2ece0;font:800 12px Inter;width:58px;height:58px;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 4px 18px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.12);transition:background .2s,border-color .2s,box-shadow .2s,color .2s}
+.mbtn svg{width:26px;height:26px;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6))}
+#mTorch .beam{opacity:0;transition:opacity .2s}
+#mTorch.on{border-color:#ffd60a;color:#ffe27a;background:radial-gradient(circle at 50% 30%,rgba(255,214,10,.35),rgba(30,24,4,.6) 75%);box-shadow:0 0 22px rgba(255,214,10,.45),inset 0 1px 0 rgba(255,255,255,.2)}
+#mTorch.on .beam{opacity:1}
+#mPhone .bdg{position:absolute;top:-3px;right:-3px;min-width:19px;height:19px;padding:0 5px;border-radius:10px;background:var(--red);color:#fff;font:800 10.5px/19px Inter;display:none;box-shadow:0 0 10px rgba(255,42,74,.7)}
+#mPhone.unread .bdg{display:block}
+#mPhone.unread{animation:phBuzz 1.6s infinite}
+@keyframes phBuzz{0%,86%,100%{transform:none}88%{transform:rotate(-9deg)}90%{transform:rotate(8deg)}92%{transform:rotate(-6deg)}94%{transform:rotate(4deg)}}
+#phone .bar button{display:flex;align-items:center;justify-content:center;gap:6px}
+#phone .bar button svg{width:16px;height:16px}
+#phone .ptabs{display:flex;gap:6px;margin:10px 4px 6px}
+#phone .ptabs button{flex:1;background:#1c1c21;border:0;color:#aaa;padding:8px;border-radius:10px;font:600 12px Inter}
+#phone .ptabs button.on{background:#f2ece0;color:#000}
+#phone .msg img{display:block;max-width:100%;border-radius:12px;margin:2px 0 4px}
+#phone .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:6px}
+#phone .grid img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:4px;cursor:pointer;display:block}
+#phone .phview img{width:100%;border-radius:10px;display:block;margin-top:8px}
+#phone .phview p{font:400 12px/1.5 Inter;color:#999;margin:8px 2px}
+.chaps .ch{display:flex;gap:14px;align-items:center;padding:12px;border:1px solid #222;border-radius:10px;margin:8px 0;cursor:pointer;background:#111117;transition:.2s}
+.chaps .ch:hover{border-color:var(--red)}
+.chaps .ch.lock{opacity:.4;cursor:default}
+.chaps .ch.lock:hover{border-color:#222}
+.chaps .n{font:400 30px 'Special Elite';color:var(--red);width:30px;text-align:center}
+.chaps b{display:block;font:600 15px Inter;color:#eee}.chaps span{font:400 12px Inter;color:#777}
 .mbtn:active{background:rgba(255,255,255,.25)}
 #mUse{right:26px;bottom:40px;width:86px;height:86px;font-size:15px;letter-spacing:.08em}
 #mUse.on{border-color:#fff;box-shadow:0 0 20px rgba(255,255,255,.35)}
@@ -70,6 +97,7 @@ body.shake #os,body.shake #c{animation:shake .08s infinite}
 #mTorch{right:38px;bottom:142px;font-size:20px}
 #mPause{right:14px;top:12px;width:42px;height:42px;font-size:13px}
 html,body{height:100dvh}
+body.mobile #clock{right:auto;left:50%;transform:translateX(-50%);top:10px}
 #fsBtn{position:fixed;z-index:95;right:max(64px,calc(env(safe-area-inset-right) + 50px));top:12px;width:42px;height:42px;border-radius:50%;border:2px solid rgba(255,255,255,.3);background:rgba(10,10,14,.55);color:#fff;font:700 18px Inter;display:none;align-items:center;justify-content:center;padding:0}
 body.mobile.canfs:not(.isfs) #fsBtn{display:flex}
 body:has(#os:not(.hidden)) #fsBtn{display:none}
@@ -350,10 +378,10 @@ body.mobile:not(.portrait) .lc .chat form input{padding:6px 8px;font-size:12px}
 <div id="mobile" class="hidden">
   <div id="look"></div>
   <div id="joy"><div id="joyKnob"></div></div>
-  <button class="mbtn" id="mUse">USA</button>
-  <button class="mbtn" id="mPhone">📱</button>
-  <button class="mbtn" id="mTorch">🔦</button>
-  <button class="mbtn" id="mPause">II</button>
+  <button class="mbtn" id="mUse" aria-label="Usa" style="flex-direction:column;font-size:10.5px;letter-spacing:.14em"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="width:24px;height:24px;margin-bottom:2px"><path d="M8 12.5V6.2a1.4 1.4 0 0 1 2.8 0v5.3"/><path d="M10.8 11V4.6a1.4 1.4 0 0 1 2.8 0V11"/><path d="M13.6 11.2V5.8a1.4 1.4 0 0 1 2.8 0v6.6"/><path d="M16.4 9.4a1.4 1.4 0 0 1 2.8 0v4.8c0 4-2.7 7.3-6.7 7.3-2.6 0-4.1-1.1-5.6-3.3l-2.3-3.6a1.4 1.4 0 0 1 2.3-1.6L8 14.4"/></svg>USA</button>
+  <button class="mbtn" id="mPhone" aria-label="Telefono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="6.5" y="2.5" width="11" height="19" rx="2.7"/><path d="M10.4 5.3h3.2"/><circle cx="12" cy="18.3" r="1" fill="currentColor" stroke="none"/></svg><span class="bdg"></span></button>
+  <button class="mbtn" id="mTorch" aria-label="Torcia"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><g class="beam" stroke-width="1.4"><path d="M12 1v2.2"/><path d="M6.3 3.2l1.3 1.6"/><path d="M17.7 3.2l-1.3 1.6"/></g><path d="M7.5 6h9l-1.6 4.2v10.3a1.5 1.5 0 0 1-1.5 1.5h-2.8a1.5 1.5 0 0 1-1.5-1.5V10.2z"/><path d="M9.1 10.2h5.8"/><circle cx="12" cy="14.6" r="1.1" fill="currentColor" stroke="none"/></svg></button>
+  <button class="mbtn" id="mPause" aria-label="Pausa"><svg style="width:18px;height:18px" viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="3.6" height="14" rx="1.2"/><rect x="13.9" y="5" width="3.6" height="14" rx="1.2"/></svg></button>
 </div>
 
 <div id="peep" class="hidden"></div>
@@ -364,7 +392,7 @@ body.mobile:not(.portrait) .lc .chat form input{padding:6px 8px;font-size:12px}
   <div class="island"></div>
   <div class="sb"><span id="phClock"></span><span>▂▄▆ 5G <span id="phBatt">🔋</span></span></div>
   <div class="scr" id="phScr"></div>
-  <div class="bar"><button id="phTorch">🔦 Torcia</button><button id="phClose">Chiudi</button></div>
+  <div class="bar"><button id="phTorch"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><g class="beam" stroke-width="1.4"><path d="M12 1v2.2"/><path d="M6.3 3.2l1.3 1.6"/><path d="M17.7 3.2l-1.3 1.6"/></g><path d="M7.5 6h9l-1.6 4.2v10.3a1.5 1.5 0 0 1-1.5 1.5h-2.8a1.5 1.5 0 0 1-1.5-1.5V10.2z"/><path d="M9.1 10.2h5.8"/><circle cx="12" cy="14.6" r="1.1" fill="currentColor" stroke="none"/></svg>Torcia</button><button id="phClose">Chiudi</button></div>
 </div>
 
 <div id="os" class="hidden">
@@ -386,6 +414,7 @@ body.mobile:not(.portrait) .lc .chat form input{padding:6px 8px;font-size:12px}
   <nav>
     <button id="bNew">Nuova partita</button>
     <button id="bCont">Continua</button>
+    <button id="bChap">Capitoli</button>
     <button id="bEnds">Finali</button>
     <button id="bOpt">Opzioni</button>
     <button id="bCred">Crediti</button>
@@ -421,6 +450,7 @@ body.mobile:not(.portrait) .lc .chat form input{padding:6px 8px;font-size:12px}
   <div style="text-align:center;margin-top:20px"><button class="btn" id="oClose">CHIUDI</button></div>
 </div></div>
 
+<div id="chapPanel" class="panel hidden"><div class="in"><h2>Capitoli</h2><div class="chaps" id="chapList"></div><div style="text-align:center;margin-top:16px"><button class="btn" data-close>CHIUDI</button></div></div></div>
 <div id="endsPanel" class="panel hidden"><div class="in"><h2>Finali</h2><div id="endsList"></div><div style="text-align:center;margin-top:16px"><button class="btn" data-close>CHIUDI</button></div></div></div>
 <div id="credPanel" class="panel hidden"><div class="in"><h2>Crediti</h2>
   <p><b>OCCHIO APERTO</b> — un creepypasta interattivo in più capitoli.</p>
@@ -479,6 +509,7 @@ body.mobile:not(.portrait) .lc .chat form input{padding:6px 8px;font-size:12px}
   if (window.visualViewport) visualViewport.addEventListener('resize', function () { dispatchEvent(new Event('resize')); });
   checkOri();
 })();
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) addEventListener('load', function () { navigator.serviceWorker.register('sw.js').catch(function () { }); });
 </script>
 <script type="module">
 import * as THREE from 'three';
@@ -523,7 +554,7 @@ const cleanName = n => String(n || '').replace(/[^\wàèéìòùÀÈÉÌÒÙ.\-]
 const SAVE_KEY = 'occhio_aperto_v1';
 let save = {};
 try { save = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}') } catch (e) { }
-save = Object.assign({ uid: null, name: null, endings: [], runs: 0, vol: 0.8, sens: 1, quality: isTouch ? 'low' : 'high' }, save);
+save = Object.assign({ uid: null, name: null, endings: [], chapter: 1, runs: 0, vol: 0.8, sens: 1, quality: isTouch ? 'low' : 'high' }, save);
 if (!save.uid) save.uid = 'p_' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
 const persist = () => { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)) } catch (e) { } };
 persist();
@@ -725,8 +756,40 @@ function I(obj, label, fn) { obj.userData.it = { label, fn }; obj.traverse(o => 
 const S = { insp: {}, doorLooks: 0, lastDoorLook: 0, start: 0, torchUses: 0, phoneOpens: 0, chatSent: 0, lastInsp: null };
 const INSP_NAMES = { poster: 'poster di Abyss Run', fridge: 'frigorifero', mirror: 'specchio', tv: 'televisore', window: 'finestra', plant: 'pianta finta', laundry: 'mucchio di vestiti', shoes: 'paio di scarpe numero 44', keys: 'ciotola delle chiavi', painting: 'quadro in corridoio', shower: 'tenda della doccia', toilet: 'water', coat: 'giacca', intercom: 'citofono', shelf: 'mensola', pc: 'case del PC', calendar: 'calendario', kwindow: 'finestra della cucina', sofa: 'divano', sink: 'lavandino' };
 function inspect(obj, key, label, lines, extra) {
-  return I(obj, label, () => { const n = (S.insp[key] = (S.insp[key] || 0) + 1); S.lastInsp = key; const l = lines[Math.min(n - 1, lines.length - 1)]; say(typeof l === 'function' ? l() : l); extra && extra(n); });
+  return I(obj, label, () => {
+    if (CH === 2 && CH2HOOK[key] && CH2HOOK[key]()) return;
+    const alt = CH === 2 && CH2L[key]; const L = alt || lines; const sk = alt ? key + '#2' : key;
+    const n = (S.insp[sk] = (S.insp[sk] || 0) + 1); S.lastInsp = key; if (CH === 2) F.c2insp = (F.c2insp || 0) + 1;
+    const l = L[Math.min(n - 1, L.length - 1)]; say(typeof l === 'function' ? l() : l); if (!alt) extra && extra(n);
+  });
 }
+/* righe alternative del capitolo 2: la casa è la stessa, tu forse no */
+const CH2L = {
+  window: ['Pioggia, come ieri. Le finestre del palazzo di fronte erano tutte buie.', 'Il civico 15. La terza finestra da destra. I tuoi occhi andavano sempre lì. Come quando si torna a guardare casa.', 'Nel vetro, il tuo riflesso aveva il telefono in mano. Tu no. Poi sì.'],
+  shoes: ['Le tue sneakers, fradicie. Accanto, le scarpe nere numero 44. Asciutte, stavolta.', 'Numero 44. Anche le tue sono 44. Lo hai controllato due volte. Il narratore ha fatto finta di non vedere.'],
+  coat: [() => `La giacca era bagnata. In tasca, al posto del biglietto, uno scontrino: Bar Gelsi, un caffè, ore 03:02. Data: ${REAL.dmy(REAL.yearAgo(1))}.`, 'Uno scontrino di un anno fa, in una giacca che ricordi di aver comprato da poco. Le giacche girano. Gli scontrini no.'],
+  keys: ['Nella ciotola le chiavi erano tre, adesso. La terza aveva un portachiavi a forma di occhio.', 'La terza chiave era consumata. Usata per anni. Ti si adattava alla mano come una vecchia abitudine.'],
+  mirror: ['La scritta sullo specchio era cambiata. Adesso diceva: BENTORNATO.', 'Ieri le lettere erano rovesciate, scritte da dentro lo specchio. Oggi erano dritte. Scritte da questa parte. Da qualcuno alto più o meno come te.', 'Provasti a cancellarla con la manica. Sotto, il vetro conservava la forma delle tue dita.'],
+  calendar: ['Il cerchio rosso di ieri era stato ripassato così tante volte da bucare la carta.', 'Sotto la data di oggi, a matita: "è tornato". La calligrafia somigliava alla tua. Il narratore non commenta le calligrafie.'],
+  painting: ['Il quadro di Leo. La casa nera, la finestra accesa.', 'Nel quadro, adesso, c\'era un secondo palazzo. Di fronte. Con una finestra accesa anche lui, e una piccola figura col telefono in mano.'],
+  laundry: ['La maglietta LEO_LIVE non era più sotto la felpa.', 'Ce l\'avevi addosso. Sotto la felpa. Non ricordavi di averla messa. Ti stava bene. Fin troppo.'],
+  fridge: ['Il sugo della mamma era in frigo. Ma la mamma non ha le chiavi.', 'Sotto il magnete "SORRIDI, TI STANNO GUARDANDO" qualcuno aveva aggiunto a penna: "ANCHE TU".'],
+  tv: ['La TV era accesa. Nessun canale. Solo neve.', 'Nella neve, per un attimo, la stanza vista dall\'alto. Dall\'angolo del soffitto, dove non c\'è niente.'],
+  sofa: ['Il tappo per webcam non era più tra i cuscini.', 'Il cuscino aveva la forma di qualcuno seduto. Era ancora tiepido.'],
+  shelf: ['Il teschio di plastica adesso guardava il letto.', 'Nella tazza STREAMER DELL\'ANNO, caffè freddo. Accanto, un bicchierino di carta: Bar Gelsi.'],
+  poster: ['La creatura del poster aveva gli occhi chiusi. Per la prima volta. Come chi non vuole vedere.'],
+  pc: ['Il PC ronzava. Non si era mai spento. Leo diceva che non si spegneva mai.', 'Sul fondo del case, sotto "L. ERA QUI", qualcuno aveva graffiato una seconda riga: "ANCHE LUI".'],
+  plant: ['La pianta finta aveva una foglia secca. Le piante finte non seccano.'],
+  intercom: ['Sul display del citofono, una chiamata persa: interno 7, ore 03:11. Il tuo citofono che chiama il tuo citofono.'],
+  shower: ['Dietro la tenda, sul piatto della doccia, impronte di scarpe. Numero 44. Ancora bagnate.', 'Le impronte arrivavano fino al muro. E lì finivano. Come se chi le aveva lasciate fosse uscito attraverso le piastrelle.'],
+  sink: ['Il rubinetto non gocciolava più. Il silenzio era peggio.'],
+  toilet: ['Il narratore, coerente, continua a rifiutarsi.'],
+  kwindow: ['Nel cortile, una finestra accesa al primo piano. Interno 1. La signora Ferri, seduta di spalle. Davanti a lei, un monitor.', 'Sul monitor della Ferri c\'era una stanza. La tua? Troppo lontano per esserne sicuri. Abbastanza vicino per non dormire.'],
+  door6: ['L\'interno 6. Dalla fessura sotto la porta, la luce azzurra di molti schermi.'],
+};
+const CH2HOOK = {
+  window: () => { if (F.c2toWindow && !F.c2atWindow) { F.c2atWindow = true; return true; } return false; },
+};
 
 /* =========================================================
    WORLD
@@ -913,13 +976,13 @@ function buildWorld() {
   B(0.8, 0.4, 0.3, std(0x3a2a1e, .7), 1.2, 0.2, 5.42, shoes);
   B(0.12, 0.08, 0.28, std(0xdddddd, .7), 1.0, 0.44, 5.42, shoes); B(0.12, 0.08, 0.28, std(0xdddddd, .7), 1.15, 0.44, 5.42, shoes);
   B(0.13, 0.09, 0.32, std(0x1a1210, .4), 1.35, 0.445, 5.42, shoes); B(0.13, 0.09, 0.32, std(0x1a1210, .4), 1.5, 0.445, 5.42, shoes);
-  inspect(shoes, 'shoes', 'Scarpe', ['Le tue sneakers. E accanto, un paio di scarpe nere da uomo che non riconosci. Numero 44. Bagnate.', 'Le scarpe nere erano ancora bagnate. Fuori pioveva da ore. Qualcuno era entrato da poco. O non era mai uscito.']);
+  inspect(shoes, 'shoes', 'Scarpe', ['Le tue sneakers. E accanto, un paio di scarpe nere da uomo che non riconosci. Numero 44. Bagnate.', 'Le scarpe nere erano ancora bagnate. Fuori pioveva da ore. Qualcuno era entrato da poco. O non era mai uscito.', 'Numero 44. Il tuo numero. Una coincidenza. In questa casa le coincidenze erano parecchie.']);
   col(0.8, 5.27, 1.6, 5.55);
   // consolle + chiavi
   const cons = new THREE.Group(); scene.add(cons);
   B(0.9, 0.05, 0.3, std(0x2a2018, .6), 2.9, 0.85, 5.42, cons); B(0.04, 0.85, 0.04, std(0x111111, .5), 2.5, 0.42, 5.42, cons); B(0.04, 0.85, 0.04, std(0x111111, .5), 3.3, 0.42, 5.42, cons);
   CY(0.12, 0.07, 0.06, std(0x8a5a3a, .5), 2.8, 0.9, 5.42, cons); B(0.05, 0.01, 0.02, std(0xb8a060, .3, .9), 2.8, 0.94, 5.42, cons);
-  inspect(cons, 'keys', 'Ciotola delle chiavi', ['Le chiavi di casa. Una copia. Ce n\'erano due, quando hai firmato il contratto. La Ferri ne ha una? E Leo?']);
+  inspect(cons, 'keys', 'Ciotola delle chiavi', ['Le chiavi di casa. Una copia. Ce n\'erano due, quando hai firmato il contratto. La Ferri ne ha una? E Leo?', 'Al buio le trovavi al primo colpo, senza guardare. Come dopo anni. Non dopo tre settimane.']);
   col(2.45, 5.27, 3.35, 5.55);
   const paint = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.85), std(0xffffff, .7, 0, { map: posterTex('painting') })); paint.position.set(4.6, 1.6, 5.53); paint.rotation.y = Math.PI; scene.add(paint);
   inspect(paint, 'painting', 'Quadro', ['Un quadro lasciato da Leo: una casa nera, una sola finestra accesa.', 'La finestra accesa è la terza da destra, al secondo piano. Come la tua.', 'Nel quadro, davanti alla porta, c\'era una piccola figura nera. Prima non c\'era.']);
@@ -927,6 +990,8 @@ function buildWorld() {
   const icom = B(0.12, 0.2, 0.04, std(0xd8d4c8, .5), 0.07, 1.45, 3.9); icom.rotation.y = Math.PI / 2;
   // interruttori
   W.swHall = B(0.08, 0.12, 0.02, std(0xeeeeee, .4), 0.65, 1.3, 5.53); I(W.swHall, 'Luce corridoio', () => { toggleLight('hall'); SFX.click(); });
+  const wallHit = B(0.7, 1.1, 0.04, new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }), 2.0, 1.35, 5.52); wallHit.castShadow = false;
+  I(wallHit, () => CH === 2 && F.c2wallOn && !F.c2listened ? 'Appoggia l\'orecchio al muro' : 'Muro', () => wallUse());
   inspect(icom, 'intercom', 'Citofono', ['Il citofono. Nessuno citofona mai. Bussano direttamente. Come se il portone fosse sempre aperto. O come se fossero già dentro.']);
   W.swBath = B(0.08, 0.12, 0.02, std(0xeeeeee, .4), 4.9, 1.3, 4.07); I(W.swBath, 'Luce bagno', () => { toggleLight('bath'); SFX.click(); });
   W.swKitchen = B(0.08, 0.12, 0.02, std(0xeeeeee, .4), 7.35, 1.3, 4.07); I(W.swKitchen, 'Luce cucina', () => { toggleLight('kitchen'); SFX.click(); });
@@ -988,12 +1053,12 @@ function buildWorld() {
   buildLights();
   buildPeople();
 }
-function drawMirror(written) {
+function drawMirror(written, words, straight) {
   const g = W.mirC.getContext('2d'), w = 256, h = 320;
   const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#4a5560'); gr.addColorStop(.5, '#2a3138'); gr.addColorStop(1, '#3d454d'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
   g.fillStyle = 'rgba(255,255,255,.04)'; for (let i = 0; i < 40; i++) g.fillRect(rand(0, w), rand(0, h), rand(10, 60), 1);
   g.fillStyle = 'rgba(0,0,0,.6)'; g.beginPath(); g.ellipse(128, 160, 42, 52, 0, 0, 7); g.fill(); g.fillRect(70, 210, 116, 110);
-  if (written) { g.save(); g.translate(w, 0); g.scale(-1, 1); g.fillStyle = 'rgba(230,235,240,.75)'; g.font = 'bold 30px Caveat,cursive'; g.textAlign = 'center'; g.fillText('CIAO', 128, 70); g.fillText(NAME().toUpperCase(), 128, 104); g.restore(); }
+  if (written) { const ws = words || ['CIAO', NAME().toUpperCase()]; g.save(); if (!straight) { g.translate(w, 0); g.scale(-1, 1); } g.fillStyle = 'rgba(230,235,240,.75)'; g.font = 'bold 30px Caveat,cursive'; g.textAlign = 'center'; ws.forEach((t, i) => g.fillText(t, 128, 70 + i * 34)); g.restore(); }
   W.mirTex.needsUpdate = true;
 }
 
@@ -1034,6 +1099,7 @@ function makePerson(o) {
   SP(0.022, std(0x111111), -0.045, 1.66, 0.115, g); SP(0.022, std(0x111111), 0.045, 1.66, 0.115, g);
   const hr = SP(0.14, hair, 0, 1.69, -0.02, g); hr.scale.set(1, .85, 1);
   if (o.bun) SP(0.07, hair, 0, 1.76, -0.12, g);
+  if (o.long) B(0.27, 0.42, 0.09, hair, 0, 1.5, -0.1, g);
   if (o.hood) { const hd = SP(0.17, top, 0, 1.66, -0.03, g); hd.scale.set(1.05, 1.1, 1.05); }
   if (o.glasses) { B(0.2, 0.03, 0.01, std(0x111111, .3), 0, 1.67, 0.13, g); }
   if (o.phone) { const ph = B(0.07, 0.13, 0.01, new THREE.MeshBasicMaterial({ color: 0x9fd0ff }), 0.2, 1.2, 0.18, g); ph.rotation.x = -0.6; g.userData.armR.rotation.x = -0.8; g.userData.armR.position.set(0.24, 1.25, 0.12); }
@@ -1092,10 +1158,10 @@ function renderWebcam() {
   const d = new Date(); g.fillText(`CAM-01  ${gameClockStr()}:${String(d.getSeconds()).padStart(2, '0')}`, 6, WC_H - 6);
   if (STREAM.phase >= 3 && Math.random() < .15) { g.fillStyle = 'rgba(255,255,255,.1)'; g.fillRect(0, rand(0, WC_H), WC_W, rand(2, 10)); }
 }
-function snapshot(cam, w = 320, h = 240) {
+function snapshot(cam, w = 320, h = 240, stamp) {
   const rt = new THREE.WebGLRenderTarget(w, h), buf = new Uint8Array(w * h * 4), c = document.createElement('canvas'); c.width = w; c.height = h; const ctx = c.getContext('2d'); const img = ctx.createImageData(w, h);
   readCam(cam, rt, buf, img, ctx, w, h, 30, [1, .95, .85]); rt.dispose();
-  ctx.font = '16px VT323'; ctx.fillStyle = '#ffb400'; ctx.fillText(`${REAL.dmy(REAL.ago(3))}  03:11`, 10, h - 12);
+  ctx.font = '16px VT323'; ctx.fillStyle = '#ffb400'; ctx.fillText(stamp || `${REAL.dmy(REAL.ago(3))}  03:11`, 10, h - 12);
   return c.toDataURL('image/jpeg', .85);
 }
 
@@ -1105,6 +1171,7 @@ function snapshot(cam, w = 320, h = 240) {
 let mode = 'loading';
 let F = {};
 let RUN = null;
+let CH = 1; // capitolo in corso
 class Run {
   constructor() { this.dead = false; this.timers = []; }
   wait(ms) { return new Promise(r => { this.timers.push(setTimeout(() => { if (!this.dead) r(); }, ms)); }); }
@@ -1167,30 +1234,46 @@ function showNote(text) { return new Promise(res => { const n = $('#note'); n.cl
 /* =========================================================
    TELEFONO
 ========================================================= */
-const PHONE = { threads: {}, order: [], cur: null };
-const CONTACTS = { 'Mamma': '#ff7aa2', 'Giulia': '#ffb86b', 'Marco': '#4ade80', 'Sig.ra Ferri': '#c9a0ff', 'Sconosciuto': '#ff2a4a' };
-function phoneReceive(from, text, silent) {
+const PHONE = { threads: {}, order: [], cur: null, tab: 'msg', photos: [], view: null };
+const CONTACTS = { 'Mamma': '#ff7aa2', 'Giulia': '#ffb86b', 'Marco': '#4ade80', 'Sig.ra Ferri': '#c9a0ff', 'Sconosciuto': '#ff2a4a', 'Sara': '#ffd34d' };
+function phoneBadge() { const n = Object.values(PHONE.threads).reduce((a, t) => a + t.unread, 0); const b = $('#mPhone'); if (!b) return; b.classList.toggle('unread', n > 0); b.querySelector('.bdg').textContent = n > 9 ? '9+' : n; }
+function phoneReceive(from, text, silent, img) {
   if (!PHONE.threads[from]) PHONE.threads[from] = { msgs: [], unread: 0 };
-  PHONE.threads[from].msgs.push({ text, t: gameClockStr(), me: false }); PHONE.threads[from].unread++;
+  PHONE.threads[from].msgs.push({ text, img, t: gameClockStr(), me: false }); PHONE.threads[from].unread++;
   PHONE.order = [from, ...PHONE.order.filter(x => x !== from)];
-  if (!silent) { SFX.ping(); if (OS.open) osNotify('📱 ' + from, text); else toast(from, text); }
-  if (mode === 'phone') renderPhone();
+  if (!silent) { SFX.ping(); const tt = img ? '📷 Foto' + (text ? ' · ' + text : '') : text; if (OS.open) osNotify('📱 ' + from, tt); else toast(from, tt); try { navigator.vibrate && navigator.vibrate(img ? [90, 60, 90, 60, 180] : [70, 50, 70]); } catch (e) { } }
+  if (mode === 'phone') renderPhone(); phoneBadge();
 }
+function phoneSend(to, text) { if (!PHONE.threads[to]) PHONE.threads[to] = { msgs: [], unread: 0 }; PHONE.threads[to].msgs.push({ text, t: gameClockStr(), me: true }); if (mode === 'phone') renderPhone(); }
 function renderPhone() {
-  const s = $('#phScr'); $('#phClock').textContent = gameClockStr();
+  const s = $('#phScr'); $('#phClock').textContent = gameClockStr(); phoneBadge();
+  const tabs = PHONE.photos.length ? `<div class="ptabs"><button data-t="msg" class="${PHONE.tab === 'msg' ? 'on' : ''}">Messaggi</button><button data-t="foto" class="${PHONE.tab === 'foto' ? 'on' : ''}">Foto</button></div>` : '';
+  const bindTabs = () => s.querySelectorAll('.ptabs button').forEach(b => b.onclick = () => { SFX.click(); PHONE.tab = b.dataset.t; PHONE.cur = null; PHONE.view = null; renderPhone(); });
+  if (PHONE.tab === 'foto' && PHONE.photos.length) {
+    if (PHONE.view != null) {
+      const ph = PHONE.photos[PHONE.view];
+      s.innerHTML = `<div class="phview"><button id="phBack" style="background:none;border:0;color:#0a84ff;font:600 15px Inter;margin-top:8px">‹ Galleria</button><img src="${ph.src}"><p>${esc(ph.cap)}</p></div>`;
+      $('#phBack').onclick = () => { PHONE.view = null; renderPhone(); };
+      if (ph.key) F[ph.key] = true;
+    } else {
+      s.innerHTML = tabs + `<h3>Foto</h3><div class="grid">${PHONE.photos.map((ph, i) => `<img data-i="${i}" src="${ph.src}">`).join('')}</div><p style="font:12px Inter;color:#555;margin:10px 4px">${PHONE.photos.length} elementi</p>`;
+      bindTabs(); s.querySelectorAll('.grid img').forEach(im => im.onclick = () => { SFX.click(); PHONE.view = +im.dataset.i; renderPhone(); });
+    }
+    return;
+  }
   if (!PHONE.cur) {
-    s.innerHTML = `<h3>Messaggi</h3>` + (PHONE.order.length ? PHONE.order.map(n => { const th = PHONE.threads[n]; const last = th.msgs[th.msgs.length - 1]; return `<div class="th" data-n="${esc(n)}"><div class="av" style="background:${CONTACTS[n] || '#555'}22;color:${CONTACTS[n] || '#aaa'}">${esc(n[0])}</div><div><div class="nm">${esc(n)}</div><div class="pv">${esc(last.text)}</div></div>${th.unread ? '<div class="dot"></div>' : ''}</div>`; }).join('') : '<p style="color:#666;font:13px Inter;padding:8px">Nessun messaggio.</p>');
-    s.querySelectorAll('.th').forEach(el => el.onclick = () => { PHONE.cur = el.dataset.n; renderPhone(); });
+    s.innerHTML = tabs + `<h3>Messaggi</h3>` + (PHONE.order.length ? PHONE.order.map(n => { const th = PHONE.threads[n]; const last = th.msgs[th.msgs.length - 1]; return `<div class="th" data-n="${esc(n)}"><div class="av" style="background:${CONTACTS[n] || '#555'}22;color:${CONTACTS[n] || '#aaa'}">${esc(n[0])}</div><div><div class="nm">${esc(n)}</div><div class="pv">${last.img ? '📷 Foto' : ''}${esc(last.text)}</div></div>${th.unread ? '<div class="dot"></div>' : ''}</div>`; }).join('') : '<p style="color:#666;font:13px Inter;padding:8px">Nessun messaggio.</p>');
+    bindTabs(); s.querySelectorAll('.th').forEach(el => el.onclick = () => { PHONE.cur = el.dataset.n; renderPhone(); });
   } else {
     const th = PHONE.threads[PHONE.cur]; th.unread = 0;
-    s.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin:6px 0 12px"><button id="phBack" style="background:none;border:0;color:#0a84ff;font:600 15px Inter">‹ Indietro</button><b style="font:700 15px Inter">${esc(PHONE.cur)}</b></div>` + th.msgs.map(m => `<div class="msg ${m.me ? 'me' : ''}">${esc(m.text)}<small>${m.t}</small></div>`).join('');
+    s.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin:6px 0 12px"><button id="phBack" style="background:none;border:0;color:#0a84ff;font:600 15px Inter">‹ Indietro</button><b style="font:700 15px Inter">${esc(PHONE.cur)}</b></div>` + th.msgs.map(m => `<div class="msg ${m.me ? 'me' : ''}">${m.img ? `<img src="${m.img}">` : ''}${esc(m.text)}<small>${m.t}</small></div>`).join('');
     $('#phBack').onclick = () => { PHONE.cur = null; renderPhone(); };
     s.scrollTop = 1e5;
   }
 }
 function openPhone() { if (mode !== 'explore') return; mode = 'phone'; unlockPointer(); S.phoneOpens++; PHONE.cur = null; $('#phone').classList.remove('hidden'); renderPhone(); SFX.click(); }
 function closePhone() { if (mode !== 'phone') return; $('#phone').classList.add('hidden'); mode = 'explore'; }
-function setTorch(on) { W.torch.intensity = on ? 16 : 0; $('#phTorch').classList.toggle('on', on); SFX.click(); if (on) { S.torchUses++; if (S.torchUses === 1) say('Una torcia. In una casa con la corrente elettrica. Prudente.'); } }
+function setTorch(on) { W.torch.intensity = on ? 16 : 0; $('#phTorch').classList.toggle('on', on); $('#mTorch').classList.toggle('on', on); try { on && navigator.vibrate && navigator.vibrate(15); } catch (e) { } SFX.click(); if (on) { S.torchUses++; if (S.torchUses === 1) say('Una torcia. In una casa con la corrente elettrica. Prudente.'); } }
 $('#phClose').onclick = closePhone; $('#phTorch').onclick = () => setTorch(W.torch.intensity === 0);
 
 /* =========================================================
@@ -1261,7 +1344,10 @@ function gameDraw(g) {
 }
 function drawPreview(dt) {
   const g = lcCtx;
-  if (STREAM.view === 'cam') {
+  if (STREAM.view === 'ext') {
+    drawFacade(g, 480, 270, { sil: F.c2atWindow ? 'window' : 'desk', wave: F.c2wave, t: performance.now() / 1000, stamp: `CAM-02 · civico 15 · ${gameClockStr()}:${String(new Date().getSeconds()).padStart(2, '0')}` });
+    g.fillStyle = '#f22'; g.beginPath(); g.arc(460, 20, 5, 0, 7); g.fill();
+  } else if (STREAM.view === 'cam') {
     g.fillStyle = '#000'; g.fillRect(0, 0, 480, 270); g.drawImage(wcCanvas, 60, 0, 360, 270);
     g.fillStyle = '#f22'; g.beginPath(); g.arc(78, 20, 5, 0, 7); g.fill(); g.fillStyle = '#fff'; g.font = '14px VT323'; g.fillText('WEBCAM — SCHERMO INTERO', 88, 25);
   } else if (STREAM.brb) {
@@ -1325,7 +1411,7 @@ function showLock() {
   const lock = $('#lock');
   const go = () => { if (lock.classList.contains('login')) return; lock.classList.add('login'); SFX.click(); setTimeout(() => $('#pin').focus(), 50); };
   lock.onclick = go; OS.lockKey = go;
-  $('#pin').oninput = e => { SFX.type(); const v = e.target.value; if (v.length === 4) { if (v === '1711') { SFX.unlock(); OS.logged = true; F.pcLogged = true; scr.innerHTML = `<div class="osfull" style="background:#0a0a12;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px"><div class="spin"></div><div style="font:500 16px Inter">Benvenuto</div></div>`; setTimeout(showDesk, 1300); } else { OS.pinTries++; e.target.value = ''; $('#pinErr').textContent = OS.pinTries > 1 ? 'PIN errato. Il post-it sul monitor, magari?' : 'PIN errato.'; SFX.buzz(); } } };
+  $('#pin').oninput = e => { SFX.type(); const v = e.target.value; if (v.length === 4) { if (v === '1711') { SFX.unlock(); OS.logged = true; F.pcLogged = true; if (OS.pinTries === 0 && !F.saidPin) { F.saidPin = true; setTimeout(() => say(CH === 2 ? 'Il PIN. Le dita lo sapevano a memoria. Da prima del post-it.' : 'Le dita digitarono il PIN prima che gli occhi finissero di leggere il post-it.'), 1500); } scr.innerHTML = `<div class="osfull" style="background:#0a0a12;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px"><div class="spin"></div><div style="font:500 16px Inter">Benvenuto</div></div>`; setTimeout(showDesk, 1300); } else { OS.pinTries++; e.target.value = ''; $('#pinErr').textContent = OS.pinTries > 1 ? 'PIN errato. Il post-it sul monitor, magari?' : 'PIN errato.'; SFX.buzz(); } } };
 }
 const APPS = {
   livecast: { n: 'LIVEcast', i: '🔴', bg: 'linear-gradient(135deg,#9b5cff,#ff2a4a)', open: () => openLivecast() },
@@ -1345,7 +1431,7 @@ function showDesk() {
   scr.querySelectorAll('#taskbar [data-a]').forEach(el => el.onclick = () => { SFX.click(); APPS[el.dataset.a].open(); });
   $('#tbStart').onclick = () => { SFX.click(); const sm = $('#startmenu'); sm.classList.toggle('on'); sm.innerHTML = `<div style="font:600 12px Inter;color:#aaa">Aggiunte</div><div class="apps">${Object.entries(APPS).filter(([k]) => k !== 'leo' || F.usb).map(([k, a]) => `<div data-a="${k}"><span>${a.i}</span>${a.n}</div>`).join('')}</div><div class="foot"><span>👤 ${esc(NAME())}</span><button title="Alzati" id="smOff">⏻</button></div>`; sm.querySelectorAll('[data-a]').forEach(el => el.onclick = () => { sm.classList.remove('on'); APPS[el.dataset.a].open(); }); $('#smOff').onclick = () => { sm.classList.remove('on'); closePC(); }; };
   if (STREAM.live || F.lcWasOpen) openLivecast();
-  if (!F.firstDesk) { F.firstDesk = true; setTimeout(() => osNotify('LIVEcast', 'La tua diretta "Prima live!! ABYSS RUN" è programmata per le ' + REAL.liveAt() + '.'), 900); }
+  if (!F.firstDesk && CH === 1) { F.firstDesk = true; setTimeout(() => osNotify('LIVEcast', 'La tua diretta "Prima live!! ABYSS RUN" è programmata per le ' + REAL.liveAt() + '.'), 900); }
 }
 function renderIcons() { const ic = $('#icons'); if (!ic) return; ic.innerHTML = Object.entries(APPS).filter(([k]) => k !== 'leo' || F.usb).map(([k, a]) => `<div class="ico" data-a="${k}"><div class="g" style="background:${a.bg}">${a.i}</div>${a.n}</div>`).join(''); ic.querySelectorAll('.ico').forEach(el => el.onclick = () => { SFX.click(); APPS[el.dataset.a].open(); }); }
 function osNotify(title, text) { if (!OS.open) return; const n = document.createElement('div'); n.className = 'osnotif'; n.innerHTML = `<b>${esc(title)}</b>${esc(text)}`; scr.appendChild(n); SFX.osping(); setTimeout(() => n.remove(), 5200); }
@@ -1379,12 +1465,17 @@ function FS() {
     'Video': [],
     'Cestino': [{ n: 'leo_LEGGIMI.txt', t: `se trovi questo file vuol dire che la Ferri non ha formattato. bene.\n\nnon togliere il nastro dalla webcam.\nlui guarda da lì.\n\nno. scusa. non da lì.\nlui guarda da dove guardi tu.\n\n- L.` }],
   };
+  if (CH === 2) {
+    fs['Video'] = [{ n: `live_${REAL.dmy(REAL.ago(1)).replace(/\//g, '-')}_0412.mp4`, vid: true }];
+    fs['Immagini'] = [...fs['Immagini'], { n: 'frame_041200.png', img2: true }];
+    fs['Documenti'] = [...fs['Documenti'], { n: 'non_ricordo.txt', t: `non ricordo di aver scritto questo file.\n\nma la data di creazione dice stanotte, 04:31.\n\ne la grammatica è la mia.\n\n"se ti stai chiedendo chi guarda chi,\n la risposta è nella finestra di fronte.\n non quella di adesso. quella di prima."` }];
+  }
   if (F.usb) fs['LEO (E:)'] = [{ n: 'spettatori.txt', t: spectatorsTxt(), key: 'usbOpened' }, { n: 'NON_SPEGNERE.txt', t: `finché la live è accesa lui resta dall'altra parte.\nquando la spegni, dall'altra parte ci vai tu.` }];
   return fs;
 }
 function spectatorsTxt() {
   const real = NET.names.slice(0, 12); const fake = FALLBACK_NAMES.slice(0, 14 - real.length);
-  return `SPETTATORI — sessione del ${REAL.dmy(REAL.yearAgo(1))} (leo_live)\n---------------------------------\nmarco_mod\nnotte_fonda\npixelmorto\ninsonne_88\n${OCC}\n\nleo_live ← ultimo accesso: ${REAL.dmy(REAL.yearAgo(1))} 03:11\n\n\nSPETTATORI — sessione del ${REAL.dmy()}\n---------------------------------\n${[...real, ...fake].join('\n')}\n${OCC}\n\n${NAME()} ← sei qui`;
+  return `SPETTATORI — sessione del ${REAL.dmy(REAL.yearAgo(1))} (leo_live)\n---------------------------------\nmarco_mod\nnotte_fonda\npixelmorto\ninsonne_88\n${OCC}${CH >= 2 ? '\nOspite' : ''}\n\nleo_live ← ultimo accesso: ${REAL.dmy(REAL.yearAgo(1))} 03:11\n\n\nSPETTATORI — sessione del ${REAL.dmy()}\n---------------------------------\n${[...real, ...fake].join('\n')}\n${OCC}\n\n${NAME()} ← sei qui`;
 }
 function openFiles(path) {
   const el = winOpen('files', 'Esplora file', '📁', 640, 400, `<div class="ex"><div class="side"></div><div class="main"></div></div>`); if (!el) return;
@@ -1392,8 +1483,8 @@ function openFiles(path) {
   side.innerHTML = Object.keys(fs).map(k => `<div data-p="${esc(k)}" class="${k === path ? 'on' : ''}">${k === 'Cestino' ? '🗑️' : k.startsWith('LEO') ? '💾' : '📂'} ${esc(k)}</div>`).join('');
   side.querySelectorAll('div').forEach(d => d.onclick = () => { SFX.click(); el.remove(); delete OS.wins.files; openFiles(d.dataset.p); });
   const list = fs[path] || [];
-  main.innerHTML = list.length ? list.map((f, i) => `<div class="file" data-i="${i}"><span>${f.img || f.emoji ? '🖼️' : '📄'}</span>${esc(f.n)}</div>`).join('') : `<div class="empty">Questa cartella è vuota.</div>`;
-  main.querySelectorAll('.file').forEach(d => d.onclick = () => { SFX.click(); const f = list[+d.dataset.i]; if (f.key) F[f.key] = true; if (f.n === 'leo_LEGGIMI.txt') F.readTrash = true; if (f.img) openImage(f.n); else if (f.emoji) openText(f.n, `\n\n          ${f.emoji}\n\n   (il setup nuovo, prima di trasferirti)`); else openText(f.n, f.t); });
+  main.innerHTML = list.length ? list.map((f, i) => `<div class="file" data-i="${i}"><span>${f.vid ? '🎞️' : f.img || f.img2 || f.emoji ? '🖼️' : '📄'}</span>${esc(f.n)}</div>`).join('') : `<div class="empty">Questa cartella è vuota.</div>`;
+  main.querySelectorAll('.file').forEach(d => d.onclick = () => { SFX.click(); const f = list[+d.dataset.i]; if (f.key) F[f.key] = true; if (f.n === 'leo_LEGGIMI.txt') F.readTrash = true; if (f.vid) openVideo(f.n); else if (f.img2) openFrame(f.n); else if (f.img) openImage(f.n); else if (f.emoji) openText(f.n, `\n\n          ${f.emoji}\n\n   (il setup nuovo, prima di trasferirti)`); else openText(f.n, f.t); });
 }
 function openText(n, t) { const el = winOpen('txt_' + n, n + ' — Note', '📝', 480, 380, `<textarea class="np" readonly></textarea>`); if (el) el.querySelector('textarea').value = t; }
 function openImage(n) {
@@ -1479,11 +1570,13 @@ function updateLC() {
   L.vw.textContent = STREAM.phase >= 4 ? '👁 1 — Ospite' : `👁 ${Math.max(0, Math.round(STREAM.viewers))}`;
   L.go.style.display = STREAM.live ? 'none' : ''; L.brb.style.display = STREAM.live ? '' : 'none'; L.end.style.display = STREAM.live ? '' : 'none';
   L.brb.textContent = STREAM.brb ? '▶ Riprendi' : '⏸ BRB';
+  const pad = L.el.querySelector('.pad'); if (pad) pad.style.visibility = STREAM.view === 'game' && !STREAM.brb && CH === 1 ? '' : 'hidden';
   const ok = (b, t, f) => `<span>${t}: <b class="${b ? '' : 'bad'}">${b ? '✓ ' + (f || 'ok') : '✗ ' + (f || 'errore')}</b></span>`;
   L.stat.innerHTML = ok(true, 'Microfono', 'HyperMic') + ok(!F.tapeOn, 'Webcam', F.tapeOn ? 'nessun segnale' : 'CAM-01') + ok(true, 'Rete', (REAL.mbps() || 38) + ' Mbps') + (STREAM.live ? `<span>Durata: <b>${Math.floor(STREAM.t / 60)}:${String(Math.floor(STREAM.t % 60)).padStart(2, '0')}</b></span>` : '');
 }
 async function goLive() {
   SFX.click();
+  if (CH === 2) { osModal('Non stasera', 'Non ti va di andare in diretta. Non dopo ieri. Il pulsante però è tiepido, come se qualcuno l\'avesse appena premuto.'); return; }
   if (F.tapeOn) { F.liveChecked = true; await osModal('Webcam non rilevata', 'CAM-01 è collegata ma non trasmette immagini. L\'obiettivo sembra coperto. Le dirette senza webcam ricevono il 70% di spettatori in meno.'); if (!F.tapeRemoved) setObjective('La webcam è coperta: alzati e togli il nastro dall\'obiettivo'); return; }
   if (VIS.current) { osModal('Aspetta', 'Stanno bussando alla porta. Forse è meglio andare a vedere prima di andare in diretta.'); return; }
   if (!F.ferriDone) { osModal('Non ancora', 'Mancano ancora pochi minuti. Rilassati.'); return; }
@@ -1497,6 +1590,7 @@ function toggleBRB() { SFX.click(); STREAM.brb = !STREAM.brb; sys(STREAM.brb ? `
 async function endLive() {
   SFX.click();
   if (STREAM.phase >= 4) { F.tryEnd = true; return; }
+  if (CH === 2) { osModal('Impossibile terminare', `Questa non è la tua diretta. Sei un ospite.\n\nProprietario: ${OCC}`); return; }
   osNotify('marco_mod', 'NON CHIUDERE ORA!! siamo appena partiti 😭');
 }
 function playerChat(v) {
@@ -1515,6 +1609,7 @@ function playerChat(v) {
 function spawnVisitor(kind) {
   let m;
   if (kind === 'ferri') m = makePerson({ top: 0x5b3a6b, bottom: 0x3a3030, hair: 0x9a9a9a, bun: true, h: 0.93, glasses: true, skin: 0xe0b89a });
+  else if (kind === 'sara') m = makePerson({ top: 0xc99a1a, bottom: 0x1d2433, hair: 0x2b1a12, long: true, h: 0.96, skin: 0xe2b48f, phone: true });
   else m = makePerson({ top: 0x18181d, bottom: 0x15151a, hair: 0x120c08, hood: true, h: 1.1, phone: true });
   m.position.set(-1.0, 0, 4.8); m.rotation.y = Math.PI / 2; scene.add(m);
   VIS.current = { kind, m }; VIS.knockT = 0.3; VIS.knocks = 0;
@@ -1526,6 +1621,7 @@ function knockTick(dt) {
 }
 async function frontDoorUse() {
   if (VIS.current) return visitorFlow();
+  if (CH === 2) { SFX.rattle(); say(pick(['Chiusa a chiave. Le mandate erano due. Tu ne dai sempre una.', 'La porta non si apriva. Dallo spioncino, il pianerottolo vuoto e la lampadina che tremava.', 'La Ferri ha una copia. Davide, forse. Tu ne hai tre. Nessuna apriva.'])); return; }
   if (STREAM.phase >= 3) { SFX.rattle(); say('La chiave girava a vuoto. La porta non era più una porta.', { glitch: true }); return; }
   if (F.liveStarted) { SFX.rattle(); say('Non adesso. Sei in diretta. Ti stanno guardando.'); return; }
   F.doorTries = (F.doorTries || 0) + 1; SFX.rattle();
@@ -1539,21 +1635,23 @@ async function frontDoorUse() {
 }
 async function visitorFlow() {
   const v = VIS.current; if (!v || VIS.handling) return; VIS.handling = true; mode = 'dialog'; unlockPointer(); progress();
-  const kind = v.kind; const who = kind === 'ferri' ? 'SIG.RA FERRI' : 'DAVIDE — INTERNO 6'; const col_ = kind === 'ferri' ? '#c9a0ff' : '#ffb86b';
-  let c = await dialog('', kind === 'ferri' ? 'Tre colpi leggeri. Qualcuno aspetta dall\'altra parte.' : 'Colpi pesanti. Impazienti. Dall\'altra parte, una luce azzurrina: lo schermo di un telefono.', ['Guarda dallo spioncino', 'Apri la porta', 'Non aprire']);
+  const kind = v.kind; const who = kind === 'ferri' ? 'SIG.RA FERRI' : kind === 'sara' ? 'SARA' : 'DAVIDE — INTERNO 6'; const col_ = kind === 'ferri' ? '#c9a0ff' : kind === 'sara' ? '#ffd34d' : '#ffb86b';
+  let c = await dialog('', kind === 'ferri' ? 'Tre colpi leggeri. Qualcuno aspetta dall\'altra parte.' : kind === 'sara' ? 'Due colpi, poi un terzo, più piano. Come chi ha paura della risposta.' : 'Colpi pesanti. Impazienti. Dall\'altra parte, una luce azzurrina: lo schermo di un telefono.', ['Guarda dallo spioncino', 'Apri la porta', 'Non aprire']);
   if (c === 0) {
     F['peeped_' + kind] = true; mode = 'peep'; $('#peep').classList.remove('hidden'); $('#hud').classList.add('hidden'); SFX.creak();
     await wait(400);
-    c = await dialog('', kind === 'ferri' ? 'La signora Ferri, la padrona di casa. Cardigan viola, capelli raccolti. Sta guardando dritto nello spioncino. Come se sapesse.' : 'Davide, il vicino dell\'interno 6. Cappuccio alzato, telefono in mano. Sullo schermo, una diretta. La tua.', ['Apri la porta', 'Non aprire']);
+    c = await dialog('', kind === 'ferri' ? 'La signora Ferri, la padrona di casa. Cardigan viola, capelli raccolti. Sta guardando dritto nello spioncino. Come se sapesse.' : kind === 'sara' ? 'Una ragazza, impermeabile giallo fradicio. Gli occhi di chi non dorme da un anno. Stringe il telefono come un\'arma. Per un attimo sembra guardare te. Poi guarda le tue scarpe.' : 'Davide, il vicino dell\'interno 6. Cappuccio alzato, telefono in mano. Sullo schermo, una diretta. La tua.', ['Apri la porta', 'Non aprire']);
     c = c + 1; $('#peep').classList.add('hidden'); $('#hud').classList.remove('hidden'); mode = 'dialog';
   }
   if (c === 1) {
     F['opened_' + kind] = true; W.doorTarget = 1.2; SFX.creak(); await wait(900);
-    if (kind === 'ferri') {
+    if (kind === 'sara') await saraTalk(who, col_);
+    else if (kind === 'ferri') {
       await talk(who, [`Oh, sei sveglio. Scusa l'ora, ${NAME()}. Passavo a vedere se andava tutto bene, col riscaldamento e… con tutto.`], col_);
       const a = await dialog(who, 'Ti trovi bene, qui? Non è un appartamento facile. Ha le sue abitudini.', ['Benissimo, grazie', 'Chi abitava qui prima di me?', 'È tardi, signora.'], col_);
       if (a === 1) { F.askedLeo = true; await talk(who, ['Leonardo. Bravo ragazzo. Faceva quelle… dirette. Parlava col computer tutta la notte.', 'Una mattina la porta era chiusa a chiave. Dall\'interno. E lui non c\'era più. Le chiavi erano nella toppa, capisci? Dall\'interno.', 'Ha lasciato delle cose nell\'armadio. Io non le ho toccate. Non mi piace toccarle.'], col_); }
       else if (a === 2) await talk(who, ['Hai ragione, hai ragione. Ai miei tempi a quest\'ora si dormiva.'], col_);
+      else await talk(who, ['Me lo immaginavo. Hai l\'aria di uno che la casa la conosce già.'], col_);
       await talk(who, ['Il computer era suo. L\'ho lasciato con la casa, sarebbe stato un peccato buttarlo. Funziona ancora, vero?', 'Ah, un\'ultima cosa. Non lasciare la webcam scoperta di notte. Leo diceva che… vabbè. Sciocchezze di una vecchia. Buonanotte, caro.'], col_);
     } else {
       await talk(who, ['Ehi. Sono Davide, quello del 6. Scusa se disturbo, so che sei in diretta. Ti sto guardando, infatti.'], col_);
@@ -1563,7 +1661,8 @@ async function visitorFlow() {
     W.doorTarget = 0; SFX.slam();
   } else {
     F['ignored_' + kind] = true;
-    if (kind === 'ferri') { await wait(800); SFX.knock(.5, 2); await wait(1500); say('Un fruscio. Qualcosa scivolò sotto la porta. Poi passi che si allontanavano, lenti.'); spawnEnvelope(); }
+    if (kind === 'sara') await saraIgnored();
+    else if (kind === 'ferri') { await wait(800); SFX.knock(.5, 2); await wait(1500); say('Un fruscio. Qualcosa scivolò sotto la porta. Poi passi che si allontanavano, lenti.'); spawnEnvelope(); }
     else { await wait(700); await say('So che sei lì dietro. Ti sento respirare.', { who: 'DAVIDE', color: col_ }); await say('Passi che si allontanano. Una porta che si chiude. Interno 6.'); }
   }
   removeVisitor(); VIS.handling = false; mode = 'explore'; lockPointer();
@@ -1578,6 +1677,7 @@ function spawnEnvelope() {
    ARMADIO / SCATOLA / LETTO
 ========================================================= */
 function wardrobeUse() {
+  if (CH === 2) { say('L\'armadio di Leo, aperto. Le grucce oscillavano piano. Qui dentro non c\'è corrente d\'aria.'); return; }
   if (F.wardOpen) { say('Odore di polvere e di qualcos\'altro. Plastica bruciata. Elettronica vecchia.'); return; }
   if (!F.wardUnlocked) { SFX.rattle(); say(pick(['L\'armadio era chiuso a chiave. La chiave non l\'avevi mai trovata.', 'Chiuso. Da dentro, qualcosa rispose al rumore della maniglia. Un piccolo tonfo. Topi, sicuramente.'])); return; }
   F.wardOpen = true; W.wTarget = 1.6; SFX.creak(); progress();
@@ -1585,12 +1685,14 @@ function wardrobeUse() {
   if (STREAM.live) setTimeout(() => chatPost(OCC, 'brav' + 'o. ora la scatola.'), 2500);
 }
 async function boxUse() {
+  if (CH === 2) { say('La scatola di Leo. Vuota. Il capello nero sul fondo non c\'era più.'); return; }
   if (!F.wardOpen) return; if (F.boxRead) { say('La scatola di Leo. Vuota, ormai. Tranne per un capello lungo e nero sul fondo.'); return; }
   SFX.click(); progress();
   await showNote(`Se stai leggendo questo, la Ferri ha dato il PC a te.\n\nNon è un PC. È una finestra. E le finestre si guardano da tutte e due le parti.\n\nREGOLE\n1. Non chiudere la live mentre lui è in chat.\n2. Se la chat scrive "dietro di te", NON girarti. Conta fino a dieci.\n3. Non dirgli il PIN. Lo sa già, ma non dirglielo.\n4. Lui non è nella stanza. È più lontano. È dall'altra parte dello schermo.\n   Quella dove sei tu, adesso.\n\nNella scatola c'è la chiavetta con la lista. Guarda chi c'era.\n\n— Leo, 16/11/2025`);
   F.boxRead = true; F.usb = true; renderIcons(); SFX.unlock(); toast('Oggetto', 'Hai preso la chiavetta USB "LEO"', '💾');
 }
 async function bedUse() {
+  if (CH === 2) { say(pick(['Il letto aveva ancora la forma del tuo corpo. Di lato, sul fianco sinistro. Come diceva lui.', 'Non avevi sonno. Avevi dormito, dicono. Il letto non sembrava d\'accordo.'])); return; }
   if (F.liveStarted) { say(STREAM.phase >= 3 ? 'Non c\'è tempo per dormire. Non c\'è più tempo per niente.' : 'Non adesso. La chat ti aspetta. Lui ti aspetta.'); return; }
   mode = 'dialog'; unlockPointer();
   const c = await dialog('', 'Il letto era sfatto e invitante. La diretta poteva aspettare. Forse.', ['Dormi. Niente diretta stanotte.', 'Non ancora.']);
@@ -1762,13 +1864,374 @@ async function finale(T) {
 }
 
 /* =========================================================
+   CAPITOLO 2 — LA PADRONA DI CASA
+========================================================= */
+/* ---------- immagini disegnate (foto, registrazioni) ---------- */
+function mkCanvas(w, h, fn) { const c = document.createElement('canvas'); c.width = w; c.height = h; fn(c.getContext('2d'), w, h); return c; }
+// la facciata del civico 14 vista da di fronte. lit = [riga, colonna] della finestra accesa (quella di Leo: terza da destra, secondo piano)
+function drawFacade(g, w, h, o = {}) {
+  const t = o.t || 0, lit = o.lit || [2, 2];
+  const sky = g.createLinearGradient(0, 0, 0, h); sky.addColorStop(0, '#04050c'); sky.addColorStop(1, '#151a2c'); g.fillStyle = sky; g.fillRect(0, 0, w, h);
+  const bx = w * .1, bw = w * .8, by = h * .1, bh = h - by;
+  g.fillStyle = '#0b0c12'; g.fillRect(bx, by, bw, bh); g.fillStyle = '#12141c'; g.fillRect(bx - 4, by, bw + 8, h * .03);
+  const cols = 5, rows = 4, cw = bw / cols, rh = bh / rows;
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) {
+    const x = bx + cw * c + cw * .22, y = by + rh * r + rh * .2, ww = cw * .56, wh = rh * .52;
+    if (r === lit[0] && c === lit[1] && !o.off) {
+      g.fillStyle = 'rgba(255,190,110,.10)'; g.fillRect(x - 8, y - 8, ww + 16, wh + 16);
+      g.fillStyle = o.cold ? '#9fc0ff' : '#e8b86a'; g.fillRect(x, y, ww, wh);
+      if (o.sil) {
+        g.fillStyle = '#100b08'; const sx = x + ww / 2;
+        if (o.sil === 'desk') { g.beginPath(); g.ellipse(sx, y + wh * .52, ww * .1, wh * .15, 0, 0, 7); g.fill(); g.fillRect(sx - ww * .22, y + wh * .68, ww * .44, wh * .32); g.fillStyle = '#7fb0ff'; g.fillRect(sx - ww * .3, y + wh * .62, ww * .14, wh * .1); }
+        else {
+          g.beginPath(); g.ellipse(sx, y + wh * .32, ww * .13, wh * .16, 0, 0, 7); g.fill(); g.fillRect(sx - ww * .26, y + wh * .5, ww * .52, wh * .5);
+          if (o.wave) g.fillRect(sx + ww * .24, y + wh * .08, ww * .08, wh * .44);
+          if (o.phone) { g.fillStyle = '#cfe6ff'; g.shadowColor = '#9fd0ff'; g.shadowBlur = 12; g.fillRect(sx - ww * .05, y + wh * .52, ww * .1, wh * .14); g.shadowBlur = 0; }
+        }
+      }
+    } else { g.fillStyle = (r * 7 + c * 3) % 6 === 0 ? '#191c27' : '#06070b'; g.fillRect(x, y, ww, wh); }
+    g.fillStyle = '#16171f'; g.fillRect(x - 3, y + wh, ww + 6, 3);
+  }
+  g.fillStyle = '#20222c'; g.font = `bold ${Math.round(h / 18)}px Inter`; g.textAlign = 'center'; g.fillText(o.num || '14', w / 2, by + bh - 6); g.textAlign = 'left';
+  g.strokeStyle = 'rgba(170,190,230,.16)'; g.lineWidth = 1;
+  for (let i = 0; i < 80; i++) { const rx = ((i * 73.3 + t * 260) % (w + 20)) - 10, ry = ((i * 131.7 + t * 820) % (h + 30)) - 15; g.beginPath(); g.moveTo(rx, ry); g.lineTo(rx - 3, ry + 13); g.stroke(); }
+  if (o.stamp) { g.fillStyle = '#ffb400'; g.font = `${Math.max(12, Math.round(h / 15))}px VT323, monospace`; g.fillText(o.stamp, 10, h - 10); }
+}
+function photoNoise(g, w, h, a = 26) { const im = g.getImageData(0, 0, w, h), d = im.data; for (let i = 0; i < d.length; i += 4) { const n = (Math.random() - .5) * a; d[i] += n; d[i + 1] += n; d[i + 2] += n; } g.putImageData(im, 0, 0); }
+// la foto nella TUA galleria: la finestra di Leo, un anno fa, dal palazzo di fronte
+function imgOldPhoto() { return mkCanvas(300, 300, (g, w, h) => { drawFacade(g, w, h, { sil: 'desk', t: 1.7, stamp: `${REAL.dmy(REAL.yearAgo(1))}  03:09` }); g.fillStyle = 'rgba(0,0,0,.55)'; g.fillRect(0, 0, w, 14); g.fillRect(0, 0, 12, h); photoNoise(g, w, h); }).toDataURL('image/jpeg', .8); }
+function imgMundane(kind) {
+  return mkCanvas(300, 300, (g, w, h) => {
+    if (kind === 'setup') { const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#2a1a5a'); gr.addColorStop(1, '#06304a'); g.fillStyle = gr; g.fillRect(0, 0, w, h); g.fillStyle = '#0a0a0e'; g.fillRect(50, 70, 200, 120); g.fillStyle = '#7b5cff'; g.fillRect(58, 78, 184, 104); g.fillStyle = '#111'; g.fillRect(140, 190, 20, 30); g.fillRect(30, 230, 240, 12); g.fillStyle = '#ff2a4a'; g.fillRect(30, 244, 240, 3); }
+    else if (kind === 'sugo') { g.fillStyle = '#d9cfbd'; g.fillRect(0, 0, w, h); g.fillStyle = '#9a9a9a'; g.beginPath(); g.ellipse(150, 170, 100, 70, 0, 0, 7); g.fill(); g.fillStyle = '#a3241a'; g.beginPath(); g.ellipse(150, 160, 86, 54, 0, 0, 7); g.fill(); g.fillStyle = '#333'; g.font = 'bold 26px Caveat,cursive'; g.fillText('mangia!! ❤', 90, 60); }
+    else { g.fillStyle = '#0c0c10'; g.fillRect(0, 0, w, h); g.fillStyle = '#e8e0c8'; g.fillRect(70, 60, 160, 180); g.fillStyle = '#222'; g.font = '22px Caveat,cursive'; ['CONTRATTO', 'int. 7', 'firma: ' + NAME()].forEach((s, i) => g.fillText(s, 90, 110 + i * 38)); }
+    photoNoise(g, w, h, 14);
+  }).toDataURL('image/jpeg', .8);
+}
+// l'ultimo fotogramma della diretta di Leo (lo manda Sara)
+function imgLeoFrame() {
+  return mkCanvas(320, 240, (g, w, h) => {
+    g.fillStyle = '#07080c'; g.fillRect(0, 0, w, h);
+    const fx = 40, fy = 34, fw = 170, fh = 130;
+    g.drawImage(mkCanvas(fw, fh, (s, sw, sh) => drawFacade(s, sw, sh, { num: '15', lit: [1, 2], sil: 'window', phone: true, cold: true, t: 2.2 })), fx, fy);
+    g.strokeStyle = '#2a2a30'; g.lineWidth = 6; g.strokeRect(fx, fy, fw, fh); g.beginPath(); g.moveTo(fx + fw / 2, fy); g.lineTo(fx + fw / 2, fy + fh); g.stroke();
+    g.fillStyle = '#0d0d11'; g.fillRect(0, 190, w, 50); g.fillStyle = '#1a1a22'; g.fillRect(220, 120, 80, 70);
+    g.fillStyle = 'rgba(34,48,58,.9)'; g.fillRect(fx + fw * .5 - 6, fy + 36, 12, 10);
+    g.fillStyle = '#ff2a4a'; g.beginPath(); g.arc(18, 18, 5, 0, 7); g.fill(); g.fillStyle = '#ddd'; g.font = '15px VT323'; g.fillText('leo_live · REC · 03:11:42', 28, 23);
+    photoNoise(g, w, h, 30);
+  }).toDataURL('image/jpeg', .82);
+}
+// le due foto del finale: da fuori, e da dentro
+function imgNowFront() { return mkCanvas(300, 300, (g, w, h) => { drawFacade(g, w, h, { sil: 'window', wave: F.c2wave, t: 5, stamp: `${REAL.dmy()}  ${REAL.hm()}` }); photoNoise(g, w, h); }).toDataURL('image/jpeg', .8); }
+function imgNowBack() {
+  return mkCanvas(300, 300, (g, w, h) => {
+    g.fillStyle = '#050508'; g.fillRect(0, 0, w, h);
+    g.drawImage(mkCanvas(150, 140, (s, sw, sh) => drawFacade(s, sw, sh, { num: '15', lit: [1, 2], sil: 'window', phone: true, cold: true, t: 4 })), 75, 50);
+    g.strokeStyle = '#1c1c22'; g.lineWidth = 7; g.strokeRect(75, 50, 150, 140);
+    g.fillStyle = '#000'; g.beginPath(); g.ellipse(150, 205, 38, 46, 0, 0, 7); g.fill(); g.fillRect(84, 238, 132, 70);
+    g.fillStyle = '#ffb400'; g.font = '17px VT323'; g.fillText(`${REAL.dmy()}  ${REAL.hm()}`, 10, h - 10);
+    photoNoise(g, w, h, 34);
+  }).toDataURL('image/jpeg', .8);
+}
+
+/* ---------- TV e registrazione ---------- */
+function drawTV() {
+  const g = W.tvC.getContext('2d'), im = g.createImageData(128, 72), d = im.data;
+  for (let i = 0; i < d.length; i += 4) { const v = Math.random() * 200; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255; }
+  g.putImageData(im, 0, 0);
+  if (Math.random() < .03) { g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(0, 0, 128, 72); g.fillStyle = '#ff2a4a'; g.font = '12px VT323'; g.fillText('● REC  CAM-01', 6, 14); }
+  W.tvTex.needsUpdate = true;
+}
+function openVideo(n) {
+  const el = winOpen('vid', n + ' — Lettore', '🎞️', 560, 440, `<div style="height:100%;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:8px"><canvas width="320" height="240" style="max-width:100%;max-height:86%;image-rendering:pixelated;background:#000"></canvas><div class="vcap" style="font:12px Inter;color:#888">Registrazione della diretta · ${REAL.dmy(REAL.ago(1))}</div></div>`);
+  if (!el) return;
+  OS.vid = el.querySelector('canvas').getContext('2d'); F.c2video = true;
+  el.querySelector('.x').addEventListener('click', () => { OS.vid = null; });
+}
+function drawVid() {
+  const g = OS.vid; if (!g) return;
+  if (F.vidBroken) { g.fillStyle = '#000'; g.fillRect(0, 0, 320, 240); g.fillStyle = '#666'; g.font = '14px Inter'; g.textAlign = 'center'; g.fillText('File danneggiato.', 160, 124); g.textAlign = 'left'; return; }
+  g.drawImage(wcCanvas, 0, 0, 320, 240);
+  const d = new Date(), sec = String(d.getSeconds()).padStart(2, '0');
+  g.fillStyle = 'rgba(0,0,0,.55)'; g.fillRect(0, 214, 320, 26);
+  g.fillStyle = '#ff2a4a'; if (Math.floor(d.getTime() / 600) % 2) { g.beginPath(); g.arc(14, 227, 5, 0, 7); g.fill(); }
+  g.fillStyle = '#eee'; g.font = '15px VT323'; g.fillText(`REC   ${F.vidLive ? REAL.dmy() + '  ' + REAL.hm() + ':' + sec : REAL.dmy(REAL.ago(1)) + '  04:12:' + sec}`, 26, 232);
+}
+function openFrame(n) {
+  if (!OS.frame) { const was = W.fig.visible, wp = W.fig.position.clone(), wr = W.fig.rotation.y, av = W.avatar.visible; W.avatar.visible = false; W.fig.visible = true; W.fig.position.set(2.75, 0, 2.25); W.fig.rotation.y = Math.PI; OS.frame = snapshot(wcCam, 320, 240, `${REAL.dmy(REAL.ago(1))}  04:12:00`); W.fig.visible = was; W.fig.position.copy(wp); W.fig.rotation.y = wr; W.avatar.visible = av; }
+  winOpen('frame', n, '🖼️', 520, 440, `<div style="height:100%;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:10px"><img src="${OS.frame}" style="max-width:100%;max-height:85%;image-rendering:pixelated"><div style="font:12px Inter;color:#888">Fotogramma estratto automaticamente · movimento rilevato vicino al letto</div></div>`);
+  if (!F.sawFrame) { F.sawFrame = true; SFX.sting(); setTimeout(() => say('Accanto al letto, mentre dormivi, qualcuno in piedi. Ti guardava dormire. Aveva la tua altezza.', { glitch: true }), 900); }
+}
+
+/* ---------- personaggi in casa ---------- */
+function removeNpc() { if (!W.npc) return; scene.remove(W.npc); const set = new Set(); W.npc.traverse(o => set.add(o)); for (let i = rayTargets.length - 1; i >= 0; i--) if (set.has(rayTargets[i])) rayTargets.splice(i, 1); W.npc = null; }
+function spawnFerriInside() {
+  removeNpc();
+  const m = makePerson({ top: 0x5b3a6b, bottom: 0x3a3030, hair: 0x9a9a9a, bun: true, h: 0.93, glasses: true, skin: 0xe0b89a });
+  m.position.set(1.15, 0, 4.85); m.rotation.y = Math.PI / 2; scene.add(m); W.npc = m;
+  I(m, 'Parla con la signora Ferri', () => ferriInTalk());
+  m.traverse(o => { if (o.isMesh) rayTargets.push(o); });
+}
+
+/* ---------- Sara ---------- */
+async function saraTalk(who, col) {
+  const n = NAME();
+  await talk(who, ['Ciao. Scusa, sono fradicia. Sono Sara. Leo è mio fratello.', 'Era. Non so più come dirlo. È passato un anno e ancora non so come dirlo.'], col);
+  const a = await dialog(who, 'Ho visto il clip della tua diretta. Tu che fissi la webcam per quaranta minuti. Senza sbattere le palpebre.', ['Non me lo ricordo', 'Non ero io', 'Che cosa vuoi?'], col);
+  await talk(who, [[
+    'Neanche Leo se lo ricordava. Le ultime settimane mi chiamava e diceva: Sara, di notte perdo dei pezzi.',
+    'Era la tua stanza. La tua felpa. La tua faccia. Ma va bene. Anche Leo diceva così, all\'inizio.',
+    'Voglio sapere chi è occhio_aperto. Era nella chat di Leo tutte le notti. Ieri era nella tua.'][a]], col);
+  await talk(who, ['Leo non usciva di casa da due anni. Ma qualcuno lo guardava. Diceva che nel palazzo di fronte c\'era una finestra che restava accesa quanto la sua.'], col);
+  const b = await dialog(who, 'Tu chi credi che sia?', ['Davide, il vicino', 'La signora Ferri', 'Non lo so'], col);
+  F.c2suspect = ['davide', 'ferri', 'none'][b];
+  await talk(who, [[
+    'Davide ha denunciato Leo tre volte per i rumori. Poi ha smesso, di colpo. Uno non smette di colpo.',
+    'La Ferri ha le chiavi di tutti gli appartamenti. Leo diceva che di notte sentiva girare la serratura. Piano. Come per non svegliarlo.',
+    'Neanch\'io. Per questo sono qui. Sei l\'unico che ha visto quello che vedeva lui.'][b]], col);
+  await talk(who, ['Questa è l\'ultima immagine della sua ultima diretta. Guarda la finestra. Te la mando.'], col);
+  phoneReceive('Sara', 'guarda la finestra.', false, imgLeoFrame());
+  await wait(900);
+  const c = await dialog(who, `Un'ultima cosa. Tu dov'eri, la notte del ${REAL.dm(REAL.yearAgo(1))}? L'anno scorso.`, ['Non abitavo qui', 'Non me lo ricordo', 'Perché lo chiedi a me?'], col);
+  F.c2alibi = ['away', 'forgot', 'why'][c];
+  await talk(who, [[
+    'Lo so. Non è quello che ti ho chiesto.',
+    '…Va bene.',
+    'Perché sei l\'unico, in questa storia, che non ha un motivo. E chi non ha un motivo, di solito, ne ha uno che non sa.'][c]], col);
+  if (F.usb) {
+    const d = await dialog(who, 'Leo aveva una chiavetta. Con la lista di chi lo guardava. Se la Ferri te l\'ha lasciata… me la dai?', ['Dagliela', 'Tienila'], col);
+    if (d === 0) { F.usb = false; F.usbTo = 'sara'; renderIcons(); toast('Oggetto', 'Hai dato la chiavetta "LEO" a Sara', '💾'); await talk(who, ['Grazie. Davvero. Sei il primo, in questo palazzo, che mi dà qualcosa invece di chiedermelo.'], col); }
+    else await talk(who, ['Capisco. Fidarsi è difficile, qui dentro. Anche Leo non si fidava. Alla fine, nemmeno di sé.'], col);
+  }
+  await talk(who, ['Vado a bussare a Davide. Se senti qualcosa attraverso il muro… non lo so. Ascolta.'], col);
+}
+async function saraIgnored() {
+  await wait(1200); SFX.knock(.4, 1);
+  await say('Passi che non se ne andavano. Poi il telefono vibrò.');
+  phoneReceive('Sara', 'Ok. Non apri. Lo capisco. Sono Sara, la sorella di Leo.');
+  await wait(1800); phoneReceive('Sara', 'Questa è l\'ultima immagine della sua ultima diretta. Guarda la finestra.', false, imgLeoFrame());
+  await wait(2200); phoneReceive('Sara', 'Vado da Davide. Se senti qualcosa attraverso il muro, ascolta.');
+}
+
+/* ---------- il muro dell'interno 6 ---------- */
+async function wallUse() {
+  if (!(CH === 2 && F.c2wallOn) || F.c2listening || F.c2listened) { say(pick(['Un muro. Sottile. In questo palazzo tutti i muri sono sottili.', 'Il muro era freddo. Dall\'altra parte, silenzio. Il silenzio di chi trattiene il fiato.'])); return; }
+  F.c2listening = true; progress(); setDrone(0.08, 3);
+  const D = (t, o) => say(t, Object.assign({ who: 'DAVIDE — OLTRE IL MURO', color: '#ffb86b' }, o)), Sa = t => say(t, { who: 'SARA — OLTRE IL MURO', color: '#ffd34d' });
+  await say('Appoggiasti l\'orecchio alla parete. Voci smorzate, come da sott\'acqua.');
+  await D('…te l\'ho detto, non è lui. Quello dell\'anno scorso era…');
+  await Sa('…com\'era?');
+  await D('…alto. Fradicio. Stava sulle scale alle tre di notte, con le chiavi in mano. Le chiavi del sette.');
+  await Sa('…e perché non l\'hai detto alla polizia?');
+  await D('…perché mi ha guardato. E mi ha salutato. Per nome.');
+  await wait(1600);
+  await D('…lo so che stai ascoltando.', { glitch: true });
+  SFX.knock(1.2, 3); try { navigator.vibrate && navigator.vibrate([120, 200, 120, 200, 120]); } catch (e) { }
+  await say('Tre colpi. Dall\'altra parte del muro. All\'altezza del tuo orecchio.');
+  F.c2listened = true; setDrone(0.05, 4);
+}
+
+/* ---------- la signora Ferri entra con la sua chiave ---------- */
+async function ferriInTalk() {
+  if (F.c2ferriTalking || F.c2ferriDone) return;
+  F.c2ferriTalking = true; mode = 'dialog'; unlockPointer(); progress();
+  const who = 'SIG.RA FERRI', col = '#c9a0ff';
+  await talk(who, ['Scusa caro, ho bussato ma non rispondevi. Ho pensato… sai, dopo ieri sera.', 'Ho visto salire quella ragazza. Ti ha detto che è la sorella di Leo, vero?'], col);
+  await talk(who, ['Leo non aveva sorelle. Era figlio unico. Come te.'], col);
+  const a = await dialog(who, 'Non fidarti di chi bussa piangendo, caro. Le lacrime sono la chiave più vecchia del mondo.', ['Come sa che sono figlio unico?', 'Forse si sbaglia lei', 'Lei come fa a sapere chi sale?'], col);
+  if (a === 0) await talk(who, ['L\'avrò letto sul contratto. O me l\'hai detto tu. L\'anno scorso.', '…Tre settimane fa, volevo dire. Alla mia età i giorni si mescolano.'], col);
+  else if (a === 1) await talk(who, ['Alla mia età ci si sbaglia su tante cose. Mai su chi entra e chi esce dal mio palazzo.'], col);
+  else await talk(who, ['Le telecamere delle scale, caro. Le ha messe mio marito, buonanima. Io guardo solo che nessuno si faccia male.', 'Non sempre ci riesco.'], col);
+  await talk(who, ['Leo aveva paura della finestra. Diceva che dal palazzo di fronte qualcuno lo guardava. Io gli dicevo: caro, sono tutte finestre buie.', 'Il civico 15, interno 7. L\'inquilino se n\'è andato la stessa settimana di Leo. Senza disdire. Ha lasciato tutto acceso.'], col);
+  const b = await dialog(who, 'E Davide? Ci hai parlato, con Davide?', ['Davide sa qualcosa', 'Davide è solo un vicino', 'E lei, cosa guarda sul suo monitor?'], col);
+  await talk(who, [[
+    'Davide sa tante cose. Ha una parete piena di schermi. Dice che è per lavoro. Non lavora da un anno.',
+    'Nessuno è solo un vicino, caro. Non in questo palazzo.',
+    'Il cortile. Le scale. A volte le finestre. Quando sei vecchia e vedova, la televisione non basta più.'][b]], col);
+  if (F.usb) {
+    const c = await dialog(who, 'La ragazza ti ha chiesto la chiavetta di Leo, vero? Dalla a me. La custodisco io. Io custodisco sempre tutto.', ['Dagliela', 'Tienila'], col);
+    if (c === 0) { F.usb = false; F.usbTo = 'ferri'; renderIcons(); toast('Oggetto', 'Hai dato la chiavetta "LEO" alla signora Ferri', '💾'); await talk(who, ['Bravo. La metto con le altre.'], col); }
+    else await talk(who, ['Come vuoi. Ma ricordati: le cose di Leo tornano sempre a casa. Prima o poi.'], col);
+  }
+  await talk(who, ['Ora vado. Chiudo io, ho la chiave.', `Ah, ${NAME()}… asciugati le scarpe, quando rientri. Lasci sempre le pozze sulle scale.`], col);
+  mode = 'cut'; walkNpcOut();
+}
+function walkNpcOut() {
+  const m = W.npc; if (!m) return finishFerri(); const from = m.position.clone(), t0 = performance.now(); m.rotation.y = -Math.PI / 2; W.doorTarget = 1.2; SFX.creak();
+  const step = () => { const k = Math.min(1, (performance.now() - t0) / 1800); m.position.x = from.x + (-1.0 - from.x) * k; if (k < 1) requestAnimationFrame(step); else finishFerri(); };
+  step();
+}
+async function finishFerri() {
+  removeNpc(); W.doorTarget = 0; SFX.slam(); await wait(500); SFX.rattle(); await wait(400); SFX.rattle();
+  mode = 'explore'; lockPointer(); F.c2ferriDone = true;
+  say('Due mandate. Dall\'esterno.');
+}
+
+/* ---------- allestimento ---------- */
+function setupCh2() {
+  F.tapeOn = false; F.tapeRemoved = true; W.tape.visible = false;
+  F.wardUnlocked = true; F.wardOpen = true; F.boxRead = true; F.usb = true; W.wTarget = W.wAng = 1.6;
+  drawMirror(true, ['BEN', 'TORNATO'], true);
+  W.tvOn = true; setLight('tv', true);
+  P.x = 2.55; P.z = 2.95; P.yaw = 0.35; P.pitch = -0.12;
+  STREAM.hist = [
+    { name: 'marco_mod', text: 'ok raga la stanza è vuota da 3 ore' }, { name: 'notte_fonda', text: 'io resto' }, { name: 'pixelmorto', text: 'la sedia si è mossa???' },
+    { name: '', text: 'Tutti gli spettatori hanno lasciato la diretta.', sys: true }, { name: OCC, text: 'bentornato. ti sei seduto alle 04:12.' }, { name: OCC, text: 'non hai sbattuto le palpebre per 40 minuti. io nemmeno.' },
+    { name: '', text: 'La diretta è terminata.', sys: true },
+  ];
+  PHONE.photos = [
+    { src: imgMundane('contratto'), cap: `${REAL.dmy(REAL.ago(21))} · contratto firmato!! 🔑` },
+    { src: imgMundane('sugo'), cap: `${REAL.dmy(REAL.ago(9))} · il sugo della mamma` },
+    { src: imgMundane('setup'), cap: `${REAL.dmy(REAL.ago(20))} · setup nuovo` },
+    { src: imgOldPhoto(), cap: `${REAL.dmy(REAL.yearAgo(1))} · 03:09 · Via dei Gelsi 15 — non ricordi di averla scattata`, key: 'c2gallery' },
+  ];
+}
+
+/* ---------- la storia ---------- */
+async function chapter2(T) {
+  const n = NAME(); setObjective('');
+  await T.wait(800); fadeIn(); setDrone(0.04, 4);
+  await T.say(`${n} si svegliò vestito, sopra le coperte. Con le scarpe ai piedi.`);
+  await T.say('Erano bagnate.');
+  await T.say('Ieri sera non sei uscito. Il narratore ne è sicuro. Quasi.');
+  setObjective('Controlla il PC');
+  $('#hint').textContent = isTouch ? 'Joystick per muoverti · trascina a destra per guardarti intorno · USA per interagire' : 'WASD per muoverti · E per interagire · Tab telefono · F torcia'; $('#hint').style.opacity = 1;
+  T.later(8000, () => $('#hint').style.opacity = 0);
+  T.later(4000, () => phoneReceive('Marco', 'bro ma che è successo ieri?? la live è andata avanti TUTTA la notte con la stanza vuota'));
+  T.later(9500, () => phoneReceive('Marco', 'poi alle 4 sei rientrato. ti sei seduto e hai fissato la webcam 40 minuti. senza dire niente. non era divertente.'));
+  T.later(17000, () => phoneReceive('Mamma', 'Amore ti ho chiamato 6 volte!! Ieri sotto casa ho visto due persone alla tua finestra. Stamattina una sola. Chi era??'));
+  T.later(27000, () => phoneReceive('Giulia', 'il clip di te che fissi la cam sta girando ovunque. "lo streamer che non sbatte le palpebre". stai bene?'));
+  await T.until('pcLogged');
+  netProgress({ step: 'c2_pc' });
+  await T.wait(1600);
+  osNotify('LIVEcast', 'Registrazione salvata: "Prima live!! ABYSS RUN" · durata 19:42:06 · spettatori unici: 1');
+  await T.wait(1800);
+  setObjective('Apri la registrazione della diretta (Esplora file → Video)');
+  await T.until('c2video');
+  // ---- la registrazione ----
+  await T.wait(2200);
+  await T.say(`La registrazione era ripresa dalla webcam. La stanza. La sedia. ${n}, seduto. Immobile.`);
+  F.vidLive = true;
+  await T.say(`L'orologio in sovrimpressione non segnava le 04:12 di stanotte. Segnava le ${REAL.hm()}. Adesso.`);
+  placeFig('behind'); SFX.whisper(); setDrone(0.12, 2);
+  await T.say('Nella registrazione, dietro la sedia, c\'era qualcuno.', { glitch: true });
+  setObjective('Non girarti');
+  const r = await Promise.race([T.untilFn(() => !OS.open).then(() => 'stood'), T.wait(10000).then(() => 'stayed')]);
+  if (r === 'stood') { W.fig.visible = false; F.vidBroken = true; await T.say('Dietro di te non c\'era nessuno. Non c\'è mai nessuno, quando ti giri.'); }
+  else { walkFig('door', 5); await T.wait(5400); W.fig.visible = false; F.vidBroken = true; await T.say('La figura attraversò la stanza, piano, e uscì dall\'inquadratura. Dalla parte della porta. Poi il file si interruppe.'); }
+  F.vidLive = false; setDrone(0.05, 4); setObjective('');
+  // ---- Sara ----
+  await T.wait(2500);
+  phoneReceive('Sara', 'Ciao. Non mi conosci. Sono Sara, la sorella di Leonardo. Leo.');
+  await T.wait(3800);
+  phoneReceive('Sara', 'Ho visto il clip. Devo parlarti di persona. Sono qui sotto. Salgo.');
+  setObjective('Sara sta salendo. Intanto: la casa non è come la ricordavi');
+  F.c2insp = 0;
+  await Promise.race([T.untilFn(() => (F.c2insp || 0) >= 3 && !OS.open), T.wait(50000)]);
+  spawnVisitor('sara'); setObjective('Bussano alla porta d\'ingresso');
+  await T.wait(900);
+  await T.say('Bussarono. Il narratore sapeva chi era. Il narratore, per una volta, sperava di sbagliarsi.');
+  await T.until('saraDone');
+  netProgress({ step: 'c2_sara' });
+  // ---- la galleria ----
+  await T.wait(3000);
+  phoneReceive('Sconosciuto', 'sara ti ha mostrato la sua foto. adesso guarda le tue.');
+  setObjective('Apri le foto del telefono');
+  await T.until('c2gallery');
+  await T.wait(1400);
+  await T.say('Il civico 14 visto da di fronte, sotto la pioggia. La finestra di Leo accesa. Leo, alla scrivania.');
+  await T.say('La data era di un anno fa. Le 03:09. Due minuti prima che Leo smettesse di giocare.');
+  await T.say(`${n} non ricordava di averla scattata. Il telefono, invece, se lo ricordava benissimo.`, { glitch: true });
+  await T.wait(1500); phoneReceive('Sconosciuto', 'bella foto. hai sempre avuto occhio.');
+  // ---- il muro ----
+  await T.wait(5000);
+  F.c2wallOn = true; SFX.knock(.25, 2);
+  await T.say('Dal corridoio, voci. Smorzate. Dall\'altra parte del muro.');
+  setObjective('Dal muro del corridoio arrivano delle voci');
+  await T.until('c2listened');
+  phoneReceive('Sconosciuto', 'dai muri si sente solo quello che vuoi sentire. lo sai meglio di me.');
+  // ---- la Ferri ----
+  await T.wait(6000);
+  SFX.rattle(); await T.wait(800); SFX.rattle();
+  await T.say('Una chiave nella serratura. Non la tua.');
+  W.doorTarget = 1.2; SFX.creak(); spawnFerriInside();
+  await T.wait(900); W.doorTarget = 0.25;
+  setObjective('Parla con la signora Ferri');
+  await T.until('c2ferriDone');
+  netProgress({ step: 'c2_ferri' });
+  // ---- finale ----
+  await T.wait(4500);
+  W.tvOn = false; setLight('tv', false); SFX.buzz(); await T.wait(300);
+  for (const l of ['hall', 'kitchen', 'bath', 'lamp', 'ring']) setLight(l, false);
+  await T.say('La TV si spense. Poi le luci. Poi, da sola, la ventola del PC accelerò.');
+  setObjective('Siediti al PC');
+  await T.untilFn(() => OS.open && OS.logged && $('#wins'));
+  F.lockSeat = true; STREAM.live = true; STREAM.view = 'ext'; STREAM.occ = true; STREAM.frozen = true; STREAM.viewers = 1; STREAM.vTarget = 1; STREAM.hist = [];
+  if (!OS.lc) openLivecast(); else { OS.lc.el.style.zIndex = ++OS.z; OS.lc.msgs.innerHTML = ''; }
+  if (OS.lc) OS.lc.el.querySelector('.ti').value = 'ospite: ' + n + ' 👁';
+  setDrone(0.15, 3); SFX.sting();
+  await T.wait(1200); sys(`${OCC} ti ha aggiunto come ospite alla sua diretta.`);
+  const O = async (t, ms = 2700) => { await T.wait(ms); chatPost(OCC, t); };
+  await O('benvenuto nella mia diretta.');
+  await O('questa è la vista da casa mia.');
+  await O(`civico 15. interno 7. di fronte a te. ti vedo alla scrivania, ${n}.`);
+  await O('ci abitava qualcuno, fino a un anno fa. guardava una finestra tutte le notti. la tua.');
+  await O('cioè. quella di leo.', 2000);
+  await O('ti ricordi la pioggia di un anno fa? era come stanotte. le scarpe, poi, non si asciugano mai davvero.', 3200);
+  await O('vai alla finestra. salutami.', 3000);
+  F.lockSeat = false; F.c2toWindow = true; setObjective('Vai alla finestra della camera');
+  await T.until('c2atWindow');
+  mode = 'cut'; unlockPointer();
+  await T.say('Nel palazzo di fronte, la terza finestra da destra si accese.');
+  await T.say('Dentro, qualcuno. Col telefono in mano. La luce dello schermo sulla faccia. La faccia, però, non si vedeva.');
+  mode = 'dialog';
+  const w = await dialog('', 'La figura alzò la mano. Lentamente. Aspettava.', ['Alza la mano', 'Resta immobile']);
+  mode = 'cut'; F.c2wave = w === 0;
+  await T.say(w === 0 ? 'Alzasti la mano. Nello stesso istante, lei la abbassò. Esattamente nello stesso istante.' : 'Restasti immobile. La figura abbassò la mano. Come chi ha perso la pazienza. O la speranza.');
+  phoneReceive('Sconosciuto', '', false, imgNowFront());
+  await T.say(`Il telefono vibrò. Una foto. ${n}, alla finestra. Scattata adesso. Da là.`);
+  await T.wait(1500); phoneReceive('Sconosciuto', '', false, imgNowBack()); SFX.sting();
+  await T.say('La seconda foto era stata scattata da dentro la stanza. Da dietro di te.', { glitch: true });
+  setObjective('Non girarti.');
+  for (const l of ['monitor', 'rgb', 'landing', 'moon', 'kmoon']) { setLight(l, false); SFX.buzz(); await T.wait(220); }
+  W.hemi.intensity = 0.05; const hb = setInterval(() => SFX.heart(), 1000); T.timers.push(hb);
+  await T.wait(2200); SFX.step(); await T.wait(800); SFX.step(); await T.wait(1500); SFX.whisper();
+  await T.say(`${n}.`, { who: 'DIETRO DI TE', color: '#ff2a4a', glitch: true, dur: 2200 });
+  await T.wait(1800); clearInterval(hb);
+  setLight('moon', true); setLight('monitor', true); W.hemi.intensity = 0.2; setDrone(0.06, 3);
+  await T.say('Quando la luce tornò, la stanza era vuota. La finestra di fronte, spenta.');
+  setObjective('');
+  phoneReceive('Sara', 'Sono da Davide. La porta era socchiusa. Non c\'è nessuno.');
+  await T.wait(3200); phoneReceive('Sara', 'Ci sono solo schermi. Sei. Tutti sulla tua diretta. Anche adesso.');
+  await T.wait(3600); phoneReceive('Sara', 'Sul frigo c\'è una foto. Sei tu. Sotto la pioggia, davanti al portone. C\'è la data. È di un anno fa.');
+  await T.wait(3600); phoneReceive('Sara', 'Tu un anno fa non abitavi qui. Vero?');
+  await T.wait(1500);
+  mode = 'dialog';
+  const rr = await dialog('SARA', 'Tu un anno fa non abitavi qui. Vero?', ['Non ero io', 'Non me lo ricordo', '(non rispondere)'], '#ffd34d');
+  if (rr === 0) phoneSend('Sara', 'non ero io'); else if (rr === 1) phoneSend('Sara', 'non me lo ricordo');
+  mode = 'cut';
+  await T.say(['Il narratore vorrebbe crederti. Ci sta provando con tutte le sue forze.', 'Il narratore, per una volta, ti crede. È proprio questo che lo spaventa.', 'Il silenzio. La risposta preferita di chi guarda.'][rr]);
+  await T.wait(800); fadeOut(); await T.wait(1800);
+  endChapter(F.usbTo === 'sara' ? 'c2_sara' : F.usbTo === 'ferri' ? 'c2_ferri' : 'c2_keep');
+}
+
+/* =========================================================
    FINALI
 ========================================================= */
 const ENDINGS = {
-  live: { t: 'IN DIRETTA', d: 'Hai fatto la tua prima diretta. Qualcuno l\'ha guardata più degli altri. Qualcuno non ha mai smesso.' },
-  sleep: { t: 'IL SONNO DEI GIUSTI', d: 'Hai scelto di dormire. Nessuna diretta, nessuna chat, nessuno a guardare. Quasi nessuno.' },
-  stairs: { t: 'LE SCALE', d: 'Hai provato ad andartene. Le scale scendevano. E scendevano. E tornavano sempre allo stesso pianerottolo.' },
+  live: { ch: 1, t: 'IN DIRETTA', d: 'Hai fatto la tua prima diretta. Qualcuno l\'ha guardata più degli altri. Qualcuno non ha mai smesso.' },
+  sleep: { ch: 1, t: 'IL SONNO DEI GIUSTI', d: 'Hai scelto di dormire. Nessuna diretta, nessuna chat, nessuno a guardare. Quasi nessuno.' },
+  stairs: { ch: 1, t: 'LE SCALE', d: 'Hai provato ad andartene. Le scale scendevano. E scendevano. E tornavano sempre allo stesso pianerottolo.' },
+  c2_sara: { ch: 2, t: 'LA SORELLA', d: 'Hai dato la chiavetta a Sara. Adesso lei sa chi guardava Leo. Tu, invece, preferisci non saperlo.' },
+  c2_ferri: { ch: 2, t: 'LA PADRONA DI CASA', d: 'Hai dato la chiavetta alla signora Ferri. Lei custodisce tutto: le chiavi, le registrazioni, gli inquilini. Anche quelli di prima.' },
+  c2_keep: { ch: 2, t: 'LA COPIA', d: 'Hai tenuto la chiavetta di Leo. La lista degli spettatori è al sicuro. Il tuo nome, però, ci compare due volte.' },
 };
+const CHAPTERS = [
+  { n: 1, t: 'In Diretta', d: 'La prima diretta. Qualcuno guarda più degli altri.' },
+  { n: 2, t: 'La Padrona di Casa', d: 'Il giorno dopo. Chi ha le chiavi di casa tua?' },
+  { n: 3, t: 'Interno 6', d: 'In arrivo.', soon: true },
+];
+const unlockedCh = () => Math.max(save.chapter || 1, save.endings.includes('live') ? 2 : 1);
 async function sleepEnding() {
   const T = RUN; F.ending = true; mode = 'cut'; fadeOut();
   await T.wait(1600); clearSubs();
@@ -1792,20 +2255,23 @@ async function endChapter(kind) {
   $('#hud').classList.add('hidden'); $('#mobile').classList.add('hidden'); $('#phone').classList.add('hidden'); $('#dialog').classList.add('hidden'); $('#peep').classList.add('hidden');
   if (!save.endings.includes(kind)) save.endings.push(kind); persist();
   netProgress({ ending: kind, endings: save.endings.join(',') });
+  if (kind === 'live') save.chapter = Math.max(save.chapter || 1, 2); persist();
   const e = ENDINGS[kind]; const secs = Math.round((performance.now() - S.start) / 1000);
+  const chEnds = Object.keys(ENDINGS).filter(k => ENDINGS[k].ch === CH), gotN = chEnds.filter(k => save.endings.includes(k)).length;
   const totIns = Object.values(S.insp).reduce((a, b) => a + b, 0);
-  $('#endIn').innerHTML = `<small>FINALE ${save.endings.length}/3 SCOPERTO</small><h1>${e.t}</h1><div class="d">${e.d}</div>
+  $('#endIn').innerHTML = `<small>CAPITOLO ${CH} · FINALE ${gotN}/${chEnds.length} SCOPERTO</small><h1>${e.t}</h1><div class="d">${e.d}</div>
    <div class="stats"><div><b>${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}</b>TEMPO</div><div><b>${totIns}</b>OGGETTI ESAMINATI</div><div><b>${S.doorLooks}</b>SGUARDI ALLA PORTA</div><div><b>${S.chatSent}</b>MESSAGGI IN CHAT</div></div>
    <div class="num" id="endNum"></div>
    <div style="font:600 11px Inter;letter-spacing:.2em;color:#666;margin-top:18px">LASCIA UN MESSAGGIO NELLA CHAT DI CHI GIOCHERÀ DOPO DI TE</div>
    <form class="leave" id="leaveF"><input maxlength="120" placeholder="apparirà col tuo nome: ${esc(NAME())}"><button class="btn" type="submit">INVIA</button></form>
-   <div class="btns"><button class="btn" id="eMenu">MENU PRINCIPALE</button><button class="btn" id="eAgain">RIGIOCA</button></div>
-   <div class="teaser">Capitolo 2 — <i>La Padrona di Casa</i> — in arrivo.<br>occhio_aperto sta guardando questa schermata.</div>`;
+   <div class="btns"><button class="btn" id="eMenu">MENU PRINCIPALE</button><button class="btn" id="eAgain">RIGIOCA</button>${CH === 1 && unlockedCh() >= 2 ? '<button class="btn" id="eNext" style="border-color:var(--red);color:#fff">CAPITOLO 2 ›</button>' : ''}</div>
+   <div class="teaser">${CH === 1 ? (unlockedCh() >= 2 ? 'Capitolo 2 — <i>La Padrona di Casa</i> — è sbloccato.' : 'Finisci la diretta per sbloccare il Capitolo 2.') : 'Capitolo 3 — <i>Interno 6</i> — in arrivo.'}<br>occhio_aperto sta guardando questa schermata.</div>`;
   $('#ending').classList.remove('hidden'); $('#fade').style.transition = 'opacity 1.2s'; $('#fade').style.opacity = 0;
   $('#leaveF').onsubmit = ev => { ev.preventDefault(); const i = ev.target.querySelector('input'); const v = i.value.trim(); if (!v) return; lastNetChat = 0; netChat(v); i.value = ''; i.placeholder = 'inviato. qualcuno lo leggerà stanotte.'; i.disabled = true; SFX.unlock(); };
   $('#leaveF input').onkeydown = ev => ev.stopPropagation();
   $('#eMenu').onclick = () => { $('#ending').classList.add('hidden'); toMenu(); };
-  $('#eAgain').onclick = () => { $('#ending').classList.add('hidden'); startGame(); };
+  $('#eAgain').onclick = () => { $('#ending').classList.add('hidden'); startGame(CH); };
+  const en = $('#eNext'); if (en) en.onclick = () => { $('#ending').classList.add('hidden'); playIntro(2); };
   if (kind === 'live') { const nn = await netFinish(); $('#endNum').textContent = nn ? `Sei la persona n° ${nn} ad aver finito il Capitolo 1. Lui le ricorda tutte.` : 'Lui si ricorderà di te.'; }
 }
 
@@ -1876,7 +2342,13 @@ function openOptions() {
 $('#oVol').oninput = e => setVol(+e.target.value); $('#oSens').oninput = e => { save.sens = +e.target.value; persist(); };
 $('#oClose').onclick = () => $('#options').classList.add('hidden');
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => b.closest('.panel').classList.add('hidden'));
-$('#bEnds').onclick = () => { initAudio(); $('#endsList').innerHTML = Object.entries(ENDINGS).map(([k, e]) => { const got = save.endings.includes(k); return `<div class="end ${got ? 'got' : ''}"><div class="q">${got ? '✓' : '?'}</div><div><b>${got ? e.t : '???'}</b><span>${got ? e.d : 'Non ancora scoperto.'}</span></div></div>`; }).join('') + `<p style="font-size:12px;color:#555;margin-top:14px">Alcuni finali si nascondono dove il narratore non vuole che tu vada.</p>`; $('#endsPanel').classList.remove('hidden'); };
+$('#bEnds').onclick = () => { initAudio(); $('#endsList').innerHTML = CHAPTERS.filter(c => !c.soon).map(c => `<div style="font:800 10px Inter;letter-spacing:.25em;color:var(--red);margin:14px 0 4px">CAPITOLO ${c.n} — ${c.t.toUpperCase()}</div>` + Object.entries(ENDINGS).filter(([, e]) => e.ch === c.n).map(([k, e]) => { const got = save.endings.includes(k); return `<div class="end ${got ? 'got' : ''}"><div class="q">${got ? '✓' : '?'}</div><div><b>${got ? e.t : '???'}</b><span>${got ? e.d : 'Non ancora scoperto.'}</span></div></div>`; }).join('')).join('') + `<p style="font-size:12px;color:#555;margin-top:14px">Alcuni finali si nascondono dove il narratore non vuole che tu vada.</p>`; $('#endsPanel').classList.remove('hidden'); };
+$('#bChap').onclick = () => {
+  initAudio(); const u = unlockedCh();
+  $('#chapList').innerHTML = CHAPTERS.map(c => { const lock = c.soon || c.n > u; return `<div class="ch ${lock ? 'lock' : ''}" data-n="${c.n}"><div class="n">${c.n}</div><div><b>${c.t}</b><span>${c.soon ? 'In arrivo.' : c.n > u ? 'Finisci il capitolo precedente per sbloccarlo.' : c.d}</span></div></div>`; }).join('');
+  $('#chapList').querySelectorAll('.ch:not(.lock)').forEach(el => el.onclick = () => { if (!save.name) { $('#chapPanel').classList.add('hidden'); $('#bNew').click(); return; } SFX.click(); $('#chapPanel').classList.add('hidden'); $('#menu').classList.add('hidden'); netRegister(); playIntro(+el.dataset.n); });
+  $('#chapPanel').classList.remove('hidden');
+};
 $('#bCred').onclick = () => { initAudio(); $('#credPanel').classList.remove('hidden'); };
 
 /* =========================================================
@@ -1889,10 +2361,10 @@ function toMenu() {
   mode = 'menu'; resetWorld();
   ['#hud', '#mobile', '#os', '#phone', '#dialog', '#peep', '#note', '#ending'].forEach(s => $(s).classList.add('hidden'));
   OS.open = false; $('#menu').classList.remove('hidden'); fadeIn(); setDrone(0.04, 2);
-  $('#bCont').disabled = !save.name; $('#bCont').textContent = save.name ? `Continua come ${save.name}` : 'Continua';
+  $('#bCont').disabled = !save.name; $('#bCont').textContent = save.name ? `Continua come ${save.name}${unlockedCh() > 1 ? ' · cap. ' + unlockedCh() : ''}` : 'Continua';
 }
 $('#bNew').onclick = () => { initAudio(); SFX.click(); $('#menu').classList.add('hidden'); $('#nameScreen').classList.remove('hidden'); const i = $('#nameIn'); i.value = save.name || ''; setTimeout(() => i.focus(), 100); };
-$('#bCont').onclick = () => { initAudio(); SFX.click(); if (!save.name) return; $('#menu').classList.add('hidden'); netRegister(); startGame(); };
+$('#bCont').onclick = () => { initAudio(); SFX.click(); if (!save.name) return; $('#menu').classList.add('hidden'); netRegister(); const u = unlockedCh(); if (u > 1) playIntro(u); else startGame(1); };
 $('#nameIn').onkeydown = e => { e.stopPropagation(); if (e.key === 'Enter') $('#nameOk').click(); else SFX.type(); };
 $('#nameOk').onclick = () => {
   const v = cleanName($('#nameIn').value.trim());
@@ -1901,13 +2373,13 @@ $('#nameOk').onclick = () => {
   if (v.toLowerCase() === 'ospite') { $('#nameErr').textContent = 'Non ancora.'; SFX.glitch(); return; }
   save.name = v; persist(); $('#nameErr').textContent = ''; $('#nameScreen').classList.add('hidden'); netRegister(); playIntro();
 };
-async function playIntro() {
+async function playIntro(ch = 1) {
   const el = $('#intro'), t = el.querySelector('.t'); el.classList.remove('hidden'); $('#skip').classList.remove('hidden');
   let skipped = false; $('#skip').onclick = () => { skipped = true; };
-  const lines = [`${REAL.dm()} ${REAL.now().getFullYear()}.`, 'Tre settimane fa ti sei trasferito in via dei Gelsi 14, interno 7. Un bilocale arredato, a un prezzo troppo basso per farsi domande.', 'Fai lo streamer. La chat è il tuo lavoro, la tua compagnia, il tuo pubblico.', 'Stanotte farai la tua prima vera diretta.', 'Qualcuno, stanotte, ti guarderà più degli altri.'];
+  const lines = ch === 2 ? [`${REAL.dm()} ${REAL.now().getFullYear()}. Il giorno dopo.`, 'Non ricordi di essere andato a letto.', 'Ricordi la webcam. Ricordi una faccia, troppo vicina. Poi più niente.', 'LIVEcast dice che la diretta è finita alle 03:11.', 'Il PC dice di no.'] : [`${REAL.dm()} ${REAL.now().getFullYear()}.`, 'Tre settimane fa ti sei trasferito in via dei Gelsi 14, interno 7. Un bilocale arredato, a un prezzo troppo basso per farsi domande.', 'Fai lo streamer. La chat è il tuo lavoro, la tua compagnia, il tuo pubblico.', 'Stanotte farai la tua prima vera diretta.', 'Qualcuno, stanotte, ti guarderà più degli altri.'];
   for (const l of lines) { if (skipped) break; t.textContent = ''; for (let i = 0; i <= l.length && !skipped; i++) { t.textContent = l.slice(0, i); if (i % 3 === 0) SFX.type(); await wait(32); } await wait(1600); }
-  if (!skipped) { t.innerHTML = `<div class="chap"><small>CAPITOLO 1</small>In Diretta</div>`; SFX.sting(); await wait(2600); }
-  el.classList.add('hidden'); $('#skip').classList.add('hidden'); startGame();
+  if (!skipped) { t.innerHTML = `<div class="chap"><small>CAPITOLO ${ch}</small>${CHAPTERS[ch - 1].t}</div>`; SFX.sting(); await wait(2600); }
+  el.classList.add('hidden'); $('#skip').classList.add('hidden'); startGame(ch);
 }
 function resetWorld() {
   F = { tapeOn: true }; STREAM.live = false; STREAM.brb = false; STREAM.phase = 0; STREAM.occ = false; STREAM.frozen = false; STREAM.hist = []; STREAM.view = 'game'; STREAM.viewers = 0; STREAM.vTarget = 0; STREAM.t = 0;
@@ -1919,16 +2391,18 @@ function resetWorld() {
   drawMirror(false); gameMinutes = 21 * 60 + 4;
   for (const k in S.insp) delete S.insp[k]; S.doorLooks = 0; S.chatSent = 0; S.torchUses = 0; S.phoneOpens = 0; S.lastInsp = null;
   P.x = 2.2; P.z = 2.9; P.yaw = 0; P.pitch = -0.05;
+  PHONE.photos = []; PHONE.tab = 'msg'; PHONE.view = null; PHONE.cur = null; W.tvOn = false; removeNpc(); OS.vid = null; OS.frame = null; phoneBadge(); $('#mTorch').classList.remove('on');
+  STREAM.view = 'game';
 }
-function startGame() {
-  if (RUN) RUN.kill(); clearSubs(); resetWorld();
+function startGame(ch = 1) {
+  if (RUN) RUN.kill(); clearSubs(); CH = ch; resetWorld(); if (ch === 2) setupCh2();
   save.prevPlay = save.lastPlay || null; save.lastPlay = Date.now(); save.runs++; persist(); netProgress({ runs: save.runs, last: Date.now() });
   $('#menu').classList.add('hidden'); $('#hud').classList.remove('hidden'); if (isTouch) $('#mobile').classList.remove('hidden');
   $('#hint').style.opacity = 1; $('#hint').textContent = '';
   $('#fade').style.transition = 'none'; $('#fade').style.opacity = 1;
   mode = 'explore'; S.start = performance.now(); progress(); setDrone(0.02, 3);
   if (!isTouch) lockPointer();
-  RUN = new Run(); chapter1(RUN);
+  RUN = new Run(); (ch === 2 ? chapter2 : chapter1)(RUN); netProgress({ chapter: ch });
 }
 
 /* =========================================================
@@ -1936,6 +2410,13 @@ function startGame() {
 ========================================================= */
 const clock = new THREE.Clock(); let frame = 0, lightningT = 12, monT = 0, nagIdx = 0;
 const NAGS = {
+  'Controlla il PC': ['Il PC. Ti aspettava anche stanotte. Ti aspetta sempre.'],
+  'Apri la registrazione della diretta (Esplora file → Video)': ['La registrazione. Il narratore non l\'ha guardata. Preferirebbe che la guardassi tu per primo.'],
+  'Apri le foto del telefono': ['Il telefono. La galleria. Il narratore insiste, purtroppo.'],
+  'Dal muro del corridoio arrivano delle voci': ['Le voci continuavano. Bastava appoggiare l\'orecchio al muro del corridoio, vicino all\'ingresso.'],
+  'Parla con la signora Ferri': ['La signora Ferri aspettava nel corridoio. Non le piace aspettare. Le piace guardare.'],
+  'Siediti al PC': ['Il PC era acceso. Nessuno l\'aveva acceso.'],
+  'Vai alla finestra della camera': ['La finestra della camera. Ti stanno aspettando. Da tutte e due le parti.'],
   'Accendi il PC sulla scrivania': [() => `Il PC, ${NAME()}. Quello con lo schermo acceso. Era lì da quando ti sei svegliato.`, 'Potresti anche non farlo. Nessuno ti obbliga. A parte la trama.', 'Il narratore aspetterà. Il narratore è molto paziente. Anche qualcun altro lo è.'],
   'Torna al PC e vai in diretta': ['La chat non si riempie da sola. Beh, in realtà sì. Ma non è questo il punto.'],
 };
@@ -1990,7 +2471,9 @@ function update(dt) {
   // stream
   chatTick(dt);
   if (frame % 15 === 0) updateLC();
-  const needCam = (OS.open && OS.lc) || (mode === 'explore' && Math.hypot(P.x - 2.4, P.z - 0.5) < 3.5);
+  if (W.tvOn && frame % 3 === 0) drawTV();
+  if (OS.vid && OS.wins.vid && frame % 2 === 0) drawVid();
+  const needCam = (OS.open && (OS.lc || OS.wins.vid)) || (mode === 'explore' && Math.hypot(P.x - 2.4, P.z - 0.5) < 3.5);
   if (needCam && frame % (HIGH ? 2 : 3) === 0) renderWebcam();
   if ((OS.lc || STREAM.live) && frame % 2 === 0) drawPreview(dt * 2);
   monT -= dt; if (monT <= 0) { monT = 0.25; drawMonitors(); }
