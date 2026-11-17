@@ -1,0 +1,36 @@
+{
+  "name": "occhio-aperto",
+  "productName": "Occhio Aperto",
+  "version": "1.0.0",
+  "description": "Occhio Aperto — horror psicologico interattivo",
+  "author": "AgonyLecter",
+  "private": true,
+  "main": "main.js",
+  "scripts": {
+    "prepare-game": "node prepare.js",
+    "start": "node prepare.js && electron .",
+    "dist": "node prepare.js && electron-builder --win --publish never"
+  },
+  "dependencies": {
+    "three": "0.160.0"
+  },
+  "devDependencies": {
+    "electron": "44.10.1",
+    "electron-builder": "26.18.1"
+  },
+  "build": {
+    "appId": "app.vercel.occhioaperto.desktop",
+    "productName": "Occhio Aperto",
+    "artifactName": "OcchioAperto-${version}-${os}-${arch}.${ext}",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "preload.js", "game/**/*", "package.json"],
+    "icon": "game/icon-512.png",
+    "win": {
+      "target": [
+        { "target": "portable", "arch": ["x64"] },
+        { "target": "zip", "arch": ["x64"] }
+      ]
+    },
+    "portable": { "artifactName": "OcchioAperto-${version}-portable.exe" }
+  }
+}
