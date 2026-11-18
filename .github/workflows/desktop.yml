@@ -22,12 +22,16 @@ jobs:
           node-version: 20
       - run: npm install --no-audit --no-fund
       - run: npm run dist
+      - name: Versione browser per itch.io (zip con index.html)
+        shell: pwsh
+        run: Compress-Archive -Path game/* -DestinationPath dist/OcchioAperto-Web.zip -Force
       - uses: actions/upload-artifact@v4
         with:
           name: OcchioAperto-Windows
           path: |
             desktop/dist/*.zip
             desktop/dist/*-portable.exe
+            desktop/dist/OcchioAperto-Web.zip
           retention-days: 30
       - name: Pubblica la release "windows" (link fissi usati dal sito)
         shell: bash
@@ -35,10 +39,10 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cd dist
-          cp *-win-x64.zip OcchioAperto-Windows.zip
+          cp OcchioAperto-*-win-x64.zip OcchioAperto-Windows.zip
           cp *-portable.exe OcchioAperto-Windows-portable.exe
           gh release delete windows --yes --cleanup-tag --repo "$GITHUB_REPOSITORY" || true
-          gh release create windows OcchioAperto-Windows.zip OcchioAperto-Windows-portable.exe \
+          gh release create windows OcchioAperto-Windows.zip OcchioAperto-Windows-portable.exe OcchioAperto-Web.zip \
             --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --latest \
             --title "Occhio Aperto per Windows" \
             --notes "Versione Windows costruita automaticamente dal commit ${GITHUB_SHA::7}. Scarica lo zip, estrailo e avvia 'Occhio Aperto.exe'. Se Windows mostra SmartScreen: Ulteriori informazioni → Esegui comunque."

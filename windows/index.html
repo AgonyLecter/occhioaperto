@@ -48,5 +48,17 @@ a{color:#c9a0ff}
   </div>
   <div class="foot">Preferisci non scaricare nulla? <a href="/">Gioca nel browser</a>.</div>
 </main>
+<script>
+if (!/^it\b/i.test(navigator.language || '')) {
+  document.documentElement.lang = 'en'; document.title = 'Occhio Aperto for Windows';
+  const T = (q, h) => { const [sel, k] = q.split('@'); const e = document.querySelectorAll(sel)[+(k || 0)]; if (e) e.innerHTML = h; };
+  T('.sub', 'Windows version');
+  T('.btn.main div', '<b>Download for Windows (.zip)</b><span>Recommended · Windows 10 and 11, 64-bit</span>');
+  T('.btn:not(.main) div', '<b>Portable version (.exe)</b><span>Single file, no install · slower to start</span>');
+  T('.box@0', '<h2>How to start</h2><ol><li>Extract the zip into a folder.</li><li>Run <b>Occhio Aperto.exe</b>. It starts in full screen (F11 for windowed).</li><li>If Windows shows «Windows protected your PC»: <b>More info → Run anyway</b>. It happens because the game is not digitally signed.</li></ol>');
+  T('.box@1', '<h2>Good to know</h2>It also works offline. With internet, the stream chat fills up with the names of people who played before you. The game is in English and Italian (Options → Language).');
+  T('.foot', 'Rather not download anything? <a href="/">Play in the browser</a>.');
+}
+</script>
 </body>
 </html>
