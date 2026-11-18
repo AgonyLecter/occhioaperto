@@ -759,7 +759,7 @@ const INSP_NAMES = { poster: 'poster di Abyss Run', fridge: 'frigorifero', mirro
 function inspect(obj, key, label, lines, extra) {
   return I(obj, label, () => {
     if (CH === 2 && CH2HOOK[key] && CH2HOOK[key]()) return;
-    const alt = CH === 2 && CH2L[key]; const L = alt || lines; const sk = alt ? key + '#2' : key;
+    const alt = (CH === 2 && CH2L[key]) || (CH === 3 && CH3L[key]); const L = alt || lines; const sk = alt ? key + '#' + CH : key;
     const n = (S.insp[sk] = (S.insp[sk] || 0) + 1); S.lastInsp = key; if (CH === 2) F.c2insp = (F.c2insp || 0) + 1;
     const l = L[Math.min(n - 1, L.length - 1)]; say(typeof l === 'function' ? l() : l); if (!alt) extra && extra(n);
   });
@@ -788,6 +788,16 @@ const CH2L = {
   kwindow: ['Nel cortile, una finestra accesa al primo piano. Interno 1. La signora Ferri, seduta di spalle. Davanti a lei, un monitor.', 'Sul monitor della Ferri c\'era una stanza. La tua? Troppo lontano per esserne sicuri. Abbastanza vicino per non dormire.'],
   door6: ['L\'interno 6. Dalla fessura sotto la porta, la luce azzurra di molti schermi.'],
 };
+const CH3L = {
+  mirror: ['Lo specchio era pulito. Troppo. Qualcuno aveva cancellato BENTORNATO. Restava l\'impronta di un palmo. Grande come il tuo.'],
+  window: ['La finestra di fronte era buia. Ma stanotte, laggiù, la tenda era tirata. Qualcuno c\'era stato.', 'Civico 15, interno 7. La chiave per entrarci, se esisteva, non era tua. Il narratore insiste: non era tua.'],
+  shoes: ['Le tue scarpe erano bagnate. Le scarpe nere numero 44 erano sparite.'],
+  keys: ['Nella ciotola, la chiave col portachiavi a forma di occhio. Non ricordavi di averla rimessa lì. Non ricordavi di averla mai presa.'],
+  coat: ['La giacca era fradicia. Le tasche, vuote. Qualcuno le aveva svuotate con cura. Forse tu.'],
+  pc: ['Il PC era spento. Per la prima volta. Il silenzio della ventola era assordante.'],
+  calendar: ['Il calendario era girato verso il muro.'],
+  tv: ['La TV era spenta. Nel riflesso nero, il corridoio alle tue spalle. Vuoto. Lo hai controllato due volte.'],
+};
 const CH2HOOK = {
   window: () => { if (F.c2toWindow && !F.c2atWindow) { F.c2atWindow = true; return true; } return false; },
 };
@@ -815,7 +825,7 @@ function buildWorld() {
   wallZ(10, 0, 5.6, [], TX.kitchen);
   wallZ(4.5, 0, 4, [], TX.paint); wallZ(6.5, 0, 4, [], TX.tile);
   // pianerottolo
-  wallX(3.4, -3, 0, [], TX.concrete); wallX(6.6, -3, 0, [], TX.concrete);
+  wallX(3.4, -3, 0, [], TX.concrete); wallX(6.6, -3, 2.6, [{ a: -2.08, b: -1.12 }], TX.concrete);
   wallZ(-3, 3.4, 6.6, [{ a: 4.3, b: 5.5, y1: 2.4 }], TX.concrete);
   // scale verso il basso (finale delle scale)
   const stairM = std(0x2c2a27, .95);
@@ -823,8 +833,10 @@ function buildWorld() {
   B(0.12, 1.4, 4, std(0x111111, 1), -5.8, -1.2, 4.9);
   W.stairCol = col(-3.06, 4.3, -2.95, 5.5);
   // porta interno 6
-  const d6 = B(0.95, 2.05, 0.06, std(0x3a2a1e, .6), -1.6, 1.025, 6.53); B(0.12, 0.08, 0.01, std(0xb8a060, .3, .8), -1.6, 1.7, 6.495);
-  inspect(d6, 'door6', 'Interno 6', ['La porta di Davide, interno 6. Dietro, il silenzio di chi trattiene il fiato.']);
+  W.d6 = new THREE.Group(); W.d6.position.set(-2.075, 0, 6.53); scene.add(W.d6);
+  const d6 = B(0.95, 2.05, 0.06, std(0x3a2a1e, .6), 0.475, 1.025, 0, W.d6); B(0.12, 0.08, 0.01, std(0xb8a060, .3, .8), 0.475, 1.7, -0.035, W.d6);
+  W.d6Ang = 0; W.d6Target = 0; W.d6Col = col(-2.1, 6.47, -1.1, 6.6);
+  inspect(W.d6, 'door6', 'Interno 6', ['La porta di Davide, interno 6. Dietro, il silenzio di chi trattiene il fiato.']);
 
   /* --- esterno città & finestre --- */
   const city = cityTex();
@@ -1053,6 +1065,7 @@ function buildWorld() {
 
   buildLights();
   buildPeople();
+  buildDavide();
 }
 function drawMirror(written, words, straight) {
   const g = W.mirC.getContext('2d'), w = 256, h = 320;
@@ -1466,7 +1479,7 @@ function FS() {
     'Video': [],
     'Cestino': [{ n: 'leo_LEGGIMI.txt', t: `se trovi questo file vuol dire che la Ferri non ha formattato. bene.\n\nnon togliere il nastro dalla webcam.\nlui guarda da lì.\n\nno. scusa. non da lì.\nlui guarda da dove guardi tu.\n\n- L.` }],
   };
-  if (CH === 2) {
+  if (CH >= 2) {
     fs['Video'] = [{ n: `live_${REAL.dmy(REAL.ago(1)).replace(/\//g, '-')}_0412.mp4`, vid: true }];
     fs['Immagini'] = [...fs['Immagini'], { n: 'frame_041200.png', img2: true }];
     fs['Documenti'] = [...fs['Documenti'], { n: 'non_ricordo.txt', t: `non ricordo di aver scritto questo file.\n\nma la data di creazione dice stanotte, 04:31.\n\ne la grammatica è la mia.\n\n"se ti stai chiedendo chi guarda chi,\n la risposta è nella finestra di fronte.\n non quella di adesso. quella di prima."` }];
@@ -1577,7 +1590,7 @@ function updateLC() {
 }
 async function goLive() {
   SFX.click();
-  if (CH === 2) { osModal('Non stasera', 'Non ti va di andare in diretta. Non dopo ieri. Il pulsante però è tiepido, come se qualcuno l\'avesse appena premuto.'); return; }
+  if (CH >= 2) { osModal('Non stasera', 'Non ti va di andare in diretta. Non dopo ieri. Il pulsante però è tiepido, come se qualcuno l\'avesse appena premuto.'); return; }
   if (F.tapeOn) { F.liveChecked = true; await osModal('Webcam non rilevata', 'CAM-01 è collegata ma non trasmette immagini. L\'obiettivo sembra coperto. Le dirette senza webcam ricevono il 70% di spettatori in meno.'); if (!F.tapeRemoved) setObjective('La webcam è coperta: alzati e togli il nastro dall\'obiettivo'); return; }
   if (VIS.current) { osModal('Aspetta', 'Stanno bussando alla porta. Forse è meglio andare a vedere prima di andare in diretta.'); return; }
   if (!F.ferriDone) { osModal('Non ancora', 'Mancano ancora pochi minuti. Rilassati.'); return; }
@@ -1591,7 +1604,7 @@ function toggleBRB() { SFX.click(); STREAM.brb = !STREAM.brb; sys(STREAM.brb ? `
 async function endLive() {
   SFX.click();
   if (STREAM.phase >= 4) { F.tryEnd = true; return; }
-  if (CH === 2) { osModal('Impossibile terminare', `Questa non è la tua diretta. Sei un ospite.\n\nProprietario: ${OCC}`); return; }
+  if (CH >= 2) { osModal('Impossibile terminare', `Questa non è la tua diretta. Sei un ospite.\n\nProprietario: ${OCC}`); return; }
   osNotify('marco_mod', 'NON CHIUDERE ORA!! siamo appena partiti 😭');
 }
 function playerChat(v) {
@@ -1622,6 +1635,7 @@ function knockTick(dt) {
 }
 async function frontDoorUse() {
   if (VIS.current) return visitorFlow();
+  if (CH === 3) return frontDoor3();
   if (CH === 2) { SFX.rattle(); say(pick(['Chiusa a chiave. Le mandate erano due. Tu ne dai sempre una.', 'La porta non si apriva. Dallo spioncino, il pianerottolo vuoto e la lampadina che tremava.', 'La Ferri ha una copia. Davide, forse. Tu ne hai tre. Nessuna apriva.'])); return; }
   if (STREAM.phase >= 3) { SFX.rattle(); say('La chiave girava a vuoto. La porta non era più una porta.', { glitch: true }); return; }
   if (F.liveStarted) { SFX.rattle(); say('Non adesso. Sei in diretta. Ti stanno guardando.'); return; }
@@ -1678,7 +1692,7 @@ function spawnEnvelope() {
    ARMADIO / SCATOLA / LETTO
 ========================================================= */
 function wardrobeUse() {
-  if (CH === 2) { say('L\'armadio di Leo, aperto. Le grucce oscillavano piano. Qui dentro non c\'è corrente d\'aria.'); return; }
+  if (CH >= 2) { say('L\'armadio di Leo, aperto. Le grucce oscillavano piano. Qui dentro non c\'è corrente d\'aria.'); return; }
   if (F.wardOpen) { say('Odore di polvere e di qualcos\'altro. Plastica bruciata. Elettronica vecchia.'); return; }
   if (!F.wardUnlocked) { SFX.rattle(); say(pick(['L\'armadio era chiuso a chiave. La chiave non l\'avevi mai trovata.', 'Chiuso. Da dentro, qualcosa rispose al rumore della maniglia. Un piccolo tonfo. Topi, sicuramente.'])); return; }
   F.wardOpen = true; W.wTarget = 1.6; SFX.creak(); progress();
@@ -1686,14 +1700,14 @@ function wardrobeUse() {
   if (STREAM.live) setTimeout(() => chatPost(OCC, 'brav' + 'o. ora la scatola.'), 2500);
 }
 async function boxUse() {
-  if (CH === 2) { say('La scatola di Leo. Vuota. Il capello nero sul fondo non c\'era più.'); return; }
+  if (CH >= 2) { say('La scatola di Leo. Vuota. Il capello nero sul fondo non c\'era più.'); return; }
   if (!F.wardOpen) return; if (F.boxRead) { say('La scatola di Leo. Vuota, ormai. Tranne per un capello lungo e nero sul fondo.'); return; }
   SFX.click(); progress();
   await showNote(`Se stai leggendo questo, la Ferri ha dato il PC a te.\n\nNon è un PC. È una finestra. E le finestre si guardano da tutte e due le parti.\n\nREGOLE\n1. Non chiudere la live mentre lui è in chat.\n2. Se la chat scrive "dietro di te", NON girarti. Conta fino a dieci.\n3. Non dirgli il PIN. Lo sa già, ma non dirglielo.\n4. Lui non è nella stanza. È più lontano. È dall'altra parte dello schermo.\n   Quella dove sei tu, adesso.\n\nNella scatola c'è la chiavetta con la lista. Guarda chi c'era.\n\n— Leo, 16/11/2025`);
   F.boxRead = true; F.usb = true; renderIcons(); SFX.unlock(); toast('Oggetto', 'Hai preso la chiavetta USB "LEO"', '💾');
 }
 async function bedUse() {
-  if (CH === 2) { say(pick(['Il letto aveva ancora la forma del tuo corpo. Di lato, sul fianco sinistro. Come diceva lui.', 'Non avevi sonno. Avevi dormito, dicono. Il letto non sembrava d\'accordo.'])); return; }
+  if (CH >= 2) { say(pick(['Il letto aveva ancora la forma del tuo corpo. Di lato, sul fianco sinistro. Come diceva lui.', 'Non avevi sonno. Avevi dormito, dicono. Il letto non sembrava d\'accordo.'])); return; }
   if (F.liveStarted) { say(STREAM.phase >= 3 ? 'Non c\'è tempo per dormire. Non c\'è più tempo per niente.' : 'Non adesso. La chat ti aspetta. Lui ti aspetta.'); return; }
   mode = 'dialog'; unlockPointer();
   const c = await dialog('', 'Il letto era sfatto e invitante. La diretta poteva aspettare. Forse.', ['Dormi. Niente diretta stanotte.', 'Non ancora.']);
@@ -2213,7 +2227,284 @@ async function chapter2(T) {
   mode = 'cut';
   await T.say(['Il narratore vorrebbe crederti. Ci sta provando con tutte le sue forze.', 'Il narratore, per una volta, ti crede. È proprio questo che lo spaventa.', 'Il silenzio. La risposta preferita di chi guarda.'][rr]);
   await T.wait(800); fadeOut(); await T.wait(1800);
+  save.c2 = { usbTo: F.usbTo || 'keep', alibi: F.c2alibi || null, suspect: F.c2suspect || null, reply: rr }; persist();
   endChapter(F.usbTo === 'sara' ? 'c2_sara' : F.usbTo === 'ferri' ? 'c2_ferri' : 'c2_keep');
+}
+
+/* =========================================================
+   CAPITOLO 3 — INTERNO 6
+========================================================= */
+/* ---------- l'appartamento di Davide (z 6.6 → 10.4) ---------- */
+function buildDavide() {
+  floor(-3, 6.6, 2.6, 10.4, TX.wood, 1.6); floor(-3, 6.6, 2.6, 10.4, TX.ceiling, 2, H, true);
+  wallZ(-3, 6.6, 10.4, [], TX.paint); wallX(10.4, -3, 2.6, [], TX.paint);
+  wallZ(2.6, 6.6, 10.4, [{ a: 8.4, b: 9.2 }], TX.paint);
+  // bagnetto (x 2.6 → 4.2, z 7.9 → 9.9)
+  floor(2.6, 7.9, 4.2, 9.9, TX.tile, 0.9, 0.003); floor(2.6, 7.9, 4.2, 9.9, TX.ceiling, 2, H, true);
+  wallX(7.9, 2.6, 4.2, [], TX.tile); wallX(9.9, 2.6, 4.2, [], TX.tile); wallZ(4.2, 7.9, 9.9, [], TX.tile);
+  W.dbDoor = new THREE.Group(); W.dbDoor.position.set(2.6, 0, 8.4); scene.add(W.dbDoor);
+  B(0.05, 2.05, 0.8, std(0xcac4b8, .6), 0, 1.025, 0.4, W.dbDoor); SP(0.03, std(0xb8a060, .3, .9), -0.04, 1.0, 0.7, W.dbDoor);
+  W.dbAng = 0; W.dbTarget = 0; W.dbCol = col(2.55, 8.4, 2.65, 9.2);
+  I(W.dbDoor, () => W.dbTarget > .5 ? 'Bagno di Davide' : 'Apri il bagno di Davide', () => davBathUse());
+  B(0.38, 0.12, 0.5, std(0xeeeeee, .2), 3.92, 0.85, 8.9); CY(0.06, 0.08, 0.7, std(0xeeeeee, .2), 3.95, 0.4, 8.9);
+  const mc = document.createElement('canvas'); mc.width = 256; mc.height = 320; W.dmirC = mc; W.dmirTex = new THREE.CanvasTexture(mc); W.dmirTex.colorSpace = THREE.SRGBColorSpace;
+  const dm = new THREE.Mesh(new THREE.PlaneGeometry(0.55, 0.7), std(0xffffff, .05, .6, { map: W.dmirTex })); dm.position.set(4.13, 1.55, 8.9); dm.rotation.y = -Math.PI / 2; scene.add(dm);
+  drawDavMirror(false);
+  W.dphone = B(0.15, 0.012, 0.08, new THREE.MeshBasicMaterial({ color: 0x9fd0ff }), 3.85, 0.925, 8.75);
+  I(W.dphone, 'Telefono di Davide', () => davPhoneUse());
+  W.L.dbath = { light: new THREE.PointLight(0xdfe8ff, 0, 4, 1.6), on: false, base: 3 }; W.L.dbath.light.position.set(3.4, 2.4, 8.9); scene.add(W.L.dbath.light);
+  // parete di schermi
+  const sc = document.createElement('canvas'); sc.width = 1024; sc.height = 384; W.dscC = sc; W.dscG = sc.getContext('2d'); W.dscTex = new THREE.CanvasTexture(sc); W.dscTex.colorSpace = THREE.SRGBColorSpace;
+  B(3.2, 1.3, 0.06, std(0x070708, .3), -0.2, 1.55, 10.33);
+  const scr = new THREE.Mesh(new THREE.PlaneGeometry(3.1, 1.16), new THREE.MeshBasicMaterial({ map: W.dscTex, toneMapped: false })); scr.position.set(-0.2, 1.55, 10.295); scr.rotation.y = Math.PI; scene.add(scr);
+  inspect(scr, 'dscreens', 'Schermi', [
+    'Sei schermi. Il tuo appartamento dalla webcam. Il tuo portone da fuori. Le scale. Un salotto con una poltrona. Un fotogramma vecchio. E questa stanza.',
+    'Sullo schermo in basso a destra, questa stanza vista dall\'angolo vicino alla porta. Una persona davanti agli schermi. Di spalle. Con la tua giacca.',
+    'Il salotto con la poltrona era quello della Ferri. La poltrona era vuota. La tazza sul bracciolo fumava ancora.'], () => { F.c3screens = true; });
+  W.L.dav = { light: new THREE.PointLight(0x7fa6ff, 0, 7, 1.6), on: false, base: 3.4 }; W.L.dav.light.position.set(-0.2, 1.6, 9.6); scene.add(W.L.dav.light);
+  // scrivania, sedia, registro
+  B(1.6, 0.05, 0.7, std(0x1b1b1f, .45), -0.2, 0.75, 9.6); [[-0.95, 9.3], [0.55, 9.3], [-0.95, 9.9], [0.55, 9.9]].forEach(([x, z]) => B(0.05, 0.74, 0.05, std(0x0d0d0f, .4, .6), x, 0.37, z)); col(-1.0, 9.25, 0.6, 10.3);
+  B(0.45, 0.08, 0.45, std(0x1a1a20, .7), -0.2, 0.48, 8.95); B(0.45, 0.6, 0.06, std(0x1a1a20, .7), -0.2, 0.82, 8.72);
+  const log = B(0.24, 0.03, 0.32, std(0x3a2416, .8), 0.25, 0.79, 9.55); log.rotation.y = 0.3;
+  inspect(log, 'dlog', 'Registro di Davide', ['Un quaderno a righe. Date, orari, frecce. Una calligrafia minuta, ossessiva.'], () => { if (!F.c3log) { F.c3log = true; showNote(davLogText()); } else showNote(davLogText()); });
+  // bacheca con i fili rossi
+  const bc = ctex(512, 320, (g, w, h) => {
+    g.fillStyle = '#8a6a44'; g.fillRect(0, 0, w, h); grain(g, w, h, .1);
+    const pins = [[70, 70, 'LEO'], [250, 60, 'FERRI'], [430, 80, 'CIV. 15'], [120, 230, 'SARA?'], [330, 220, '?']];
+    g.strokeStyle = '#c0141f'; g.lineWidth = 2; [[0, 1], [0, 2], [1, 4], [2, 4], [3, 4], [0, 3]].forEach(([a, b]) => { g.beginPath(); g.moveTo(pins[a][0], pins[a][1]); g.lineTo(pins[b][0], pins[b][1]); g.stroke(); });
+    pins.forEach(([x, y, t], i) => { g.fillStyle = i === 4 ? '#111' : '#e8e0c8'; g.fillRect(x - 46, y - 34, 92, 68); g.fillStyle = i === 4 ? '#ff2a4a' : '#222'; g.font = 'bold 20px Caveat,cursive'; g.textAlign = 'center'; g.fillText(t, x, y + 6); g.fillStyle = '#c0141f'; g.beginPath(); g.arc(x, y - 30, 5, 0, 7); g.fill(); });
+  });
+  const board = new THREE.Mesh(new THREE.PlaneGeometry(1.4, 0.88), std(0xffffff, .9, 0, { map: bc })); board.position.set(-2.94, 1.55, 8.2); board.rotation.y = Math.PI / 2; scene.add(board);
+  inspect(board, 'dboard', 'Bacheca', [
+    'Una bacheca di sughero. Fili rossi tra quattro nomi: LEO, FERRI, CIV. 15, SARA con un punto di domanda.',
+    'Tutti i fili finivano su un foglio nero al centro. Sopra, a pennarello rosso, solo un punto di domanda. E sotto, piccolissimo: "ha le chiavi".',
+    'Sul retro del foglio nero qualcuno aveva scritto un nome. Era stato cancellato con tanta forza da strappare la carta. Restava la prima lettera. La stessa del tuo nome.'], () => { F.c3board = true; });
+  // frigo con la foto
+  const fr = new THREE.Group(); scene.add(fr);
+  B(0.6, 1.7, 0.6, std(0xcfcfcf, .35, .2), 2.2, 0.85, 7.1, fr); B(0.12, 0.16, 0.005, std(0xe8e0c8, .9), 2.2, 1.35, 6.795, fr);
+  col(1.9, 6.8, 2.5, 7.4);
+  inspect(fr, 'dfridge', 'Frigorifero', [() => { if (!F.c3photo) { F.c3photo = true; PHONE.photos.unshift({ src: imgRainPhoto(), cap: `Foto sul frigo di Davide · ${REAL.dmy(REAL.yearAgo(1))} · 02:58` }); toast('Telefono', 'Hai fotografato la foto sul frigo di Davide', '📷'); } return 'Sul frigo, una foto. Il portone del civico 14, di notte, sotto la pioggia. Davanti, una persona con il telefono alzato verso le finestre.'; },
+    'La persona nella foto aveva una giacca blu scuro. Il cappuccio alzato. La faccia, nell\'ombra. La data sul retro: un anno fa, 02:58.', 'Il frigo era vuoto. Davide non mangiava qui da giorni. O non ci abitava da molto più tempo.']);
+  // gancio delle chiavi
+  const hook = B(0.18, 0.12, 0.03, std(0x3a2a1e, .6), -0.8, 1.45, 6.68);
+  inspect(hook, 'dhook', 'Gancio delle chiavi', ['Un gancio vicino alla porta. Vuoto. Sopra, un\'etichetta scritta a mano: "15/7".', 'Civico 15, interno 7. L\'appartamento di fronte. La chiave non c\'era. Il segno sul muro diceva che era stata appesa lì per molto tempo.'], () => { F.c3hook = true; });
+  // letto, vestiti
+  B(1.0, 0.22, 1.9, std(0xbdb8ae, .95), -2.3, 0.11, 9.3); B(0.9, 0.08, 1.3, std(0x2a3040, .95, 0, { map: TX.fabric }), -2.3, 0.26, 9.55); col(-2.85, 8.3, -1.75, 10.3);
+  const dbed = B(1.0, 0.3, 1.9, new THREE.MeshBasicMaterial({ transparent: true, opacity: 0, depthWrite: false }), -2.3, 0.15, 9.3);
+  inspect(dbed, 'dbed', 'Materasso', ['Un materasso a terra. Le lenzuola girate verso gli schermi. Davide dormiva guardando.', 'Sotto il cuscino, un taccuino più piccolo. Una sola pagina scritta: "se entra, non guardarlo negli occhi. lui si ricorda solo quando lo guardi."']);
+  // telecamera nell'angolo (vede anche "te")
+  W.davCam = new THREE.PerspectiveCamera(78, 4 / 3, 0.05, 20); W.davCam.position.set(2.2, 2.35, 7.0); W.davCam.lookAt(-0.6, 0.9, 9.9); W.davCam.layers.enable(1);
+  B(0.08, 0.06, 0.1, std(0x111111, .4), 2.25, 2.4, 6.85);
+  W.self = makePerson({ top: 0x22303a, bottom: 0x1b1b22, hair: 0x1a120c, hood: true, h: 1.0 }); layer1(W.self); scene.add(W.self); W.self.visible = false;
+}
+function drawDavMirror(on) {
+  const g = W.dmirC.getContext('2d'), w = 256, h = 320;
+  const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#4a5560'); gr.addColorStop(1, '#2a3138'); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+  g.fillStyle = 'rgba(0,0,0,.55)'; g.beginPath(); g.ellipse(128, 165, 40, 50, 0, 0, 7); g.fill(); g.fillRect(72, 212, 112, 108);
+  if (on) { g.fillStyle = 'rgba(200,20,40,.85)'; g.font = 'bold 40px Caveat,cursive'; g.textAlign = 'center'; g.fillText('OSPITE', 128, 80); }
+  W.dmirTex.needsUpdate = true;
+}
+function davLogText() {
+  const y = REAL.dmy(REAL.yearAgo(1)), y2 = REAL.dmy(REAL.yearAgo(0)), d3 = REAL.dmy(REAL.ago(3)), d1 = REAL.dmy(REAL.ago(1));
+  return `REGISTRO — scale e finestre\n\n${y}\n02:41  la luce del 15/7 è accesa. di nuovo.\n02:58  qualcuno davanti al portone. cappuccio. telefono alzato.\n03:02  sale. bagnato. ha le chiavi del 7 in mano.\n03:03  mi saluta. mi chiama per nome.\n03:11  la luce di leo resta accesa. leo no.\n\n${y2}\n?? non ho dormito. il 15/7 è spento da allora.\n\n${d3}\n03:11  il nuovo inquilino del 7 è sveglio.\n         ha la stessa giacca.\n\n${d1}\n04:12  è tornato. si è seduto davanti alla webcam.\n         non ha sbattuto le palpebre per 40 minuti.\n         ho guardato anch'io. per 40 minuti.\n\noggi\n         se leggi questo, sei entrato.\n         lo sapevo. entri sempre.`;
+}
+function imgRainPhoto() {
+  return mkCanvas(300, 300, (g, w, h) => {
+    drawFacade(g, w, h, { sil: 'desk', t: 6, stamp: `${REAL.dmy(REAL.yearAgo(1))}  02:58` });
+    g.fillStyle = '#0a0c12'; g.fillRect(118, 220, 64, 80); g.fillStyle = '#15171f'; g.fillRect(124, 226, 52, 74);
+    g.fillStyle = '#1b2733'; g.beginPath(); g.ellipse(150, 238, 13, 16, 0, 0, 7); g.fill(); g.fillRect(134, 252, 32, 48);
+    g.fillStyle = '#cfe6ff'; g.shadowColor = '#9fd0ff'; g.shadowBlur = 10; g.fillRect(166, 236, 6, 10); g.shadowBlur = 0;
+    photoNoise(g, w, h, 28);
+  }).toDataURL('image/jpeg', .8);
+}
+/* ---------- schermi ---------- */
+const davBuf = { rt: null, buf: null, img: null, c: null, g: null };
+function davCamRender() {
+  if (!davBuf.rt) { davBuf.rt = new THREE.WebGLRenderTarget(160, 120); davBuf.buf = new Uint8Array(160 * 120 * 4); davBuf.c = document.createElement('canvas'); davBuf.c.width = 160; davBuf.c.height = 120; davBuf.g = davBuf.c.getContext('2d'); davBuf.img = davBuf.g.createImageData(160, 120); }
+  readCam(W.davCam, davBuf.rt, davBuf.buf, davBuf.img, davBuf.g, 160, 120, 22, [0.85, 0.95, 1.1]);
+}
+let davLeo = null;
+function drawDavScreens() {
+  const g = W.dscG, t = performance.now() / 1000;
+  if (!davLeo) { davLeo = new Image(); davLeo.src = imgLeoFrame(); }
+  g.fillStyle = '#020203'; g.fillRect(0, 0, 1024, 384);
+  const pw = 330, ph = 182, lab = ['CAM-01 · INT. 7', 'ESTERNO · CIVICO 14', 'SCALE', 'INT. 1', 'ARCHIVIO · 1 ANNO FA', 'INT. 6'];
+  for (let i = 0; i < 6; i++) {
+    const x = 7 + (i % 3) * (pw + 12), y = 7 + Math.floor(i / 3) * (ph + 12), k = F.c3allYou ? 5 : i;
+    g.save(); g.beginPath(); g.rect(x, y, pw, ph); g.clip();
+    if (k === 0) g.drawImage(wcCanvas, x, y, pw, ph);
+    else if (k === 1) { g.translate(x, y); drawFacade(g, pw, ph, { t, sil: F.c3allYou ? 'window' : null }); g.setTransform(1, 0, 0, 1, 0, 0); }
+    else if (k === 2) { g.fillStyle = '#0d0c0a'; g.fillRect(x, y, pw, ph); g.fillStyle = Math.random() < .04 ? '#111' : '#2a2620'; for (let s = 0; s < 7; s++) g.fillRect(x + 40 + s * 30, y + ph - 20 - s * 18, 120, 6); if (F.c3ferriStairs) { g.fillStyle = '#000'; g.fillRect(x + 220, y + 50, 26, 90); g.beginPath(); g.arc(x + 233, y + 42, 13, 0, 7); g.fill(); } }
+    else if (k === 3) { g.fillStyle = '#16120e'; g.fillRect(x, y, pw, ph); g.fillStyle = '#3a2a24'; g.fillRect(x + 120, y + 80, 90, 80); g.fillRect(x + 120, y + 40, 90, 50); g.fillStyle = '#aa8866'; g.fillRect(x + 200, y + 92, 10, 8); if (!F.c3ferriStairs && Math.sin(t * .3) > .9) { g.fillStyle = '#000'; g.beginPath(); g.arc(x + 165, y + 60, 16, 0, 7); g.fill(); } }
+    else if (k === 4) { if (davLeo.complete) g.drawImage(davLeo, x, y, pw, ph); }
+    else if (k === 5 && davBuf.c) g.drawImage(davBuf.c, x, y, pw, ph);
+    g.restore();
+    g.fillStyle = 'rgba(0,0,0,.55)'; g.fillRect(x, y + ph - 20, pw, 20); g.fillStyle = '#ddd'; g.font = '15px VT323'; g.textAlign = 'left'; g.fillText(F.c3allYou ? 'INT. 6 · ' + gameClockStr() : lab[i], x + 6, y + ph - 6);
+    if (Math.floor(t * 2) % 2) { g.fillStyle = '#ff2a4a'; g.beginPath(); g.arc(x + pw - 12, y + 12, 4, 0, 7); g.fill(); }
+  }
+  if (F.c3allYou && Math.floor(t * 1.5) % 2) { g.fillStyle = 'rgba(255,42,74,.9)'; g.font = '64px Special Elite'; g.textAlign = 'center'; g.fillText('TI VEDO', 512, 210); g.textAlign = 'left'; }
+  W.dscTex.needsUpdate = true;
+}
+function davTick(dt) {
+  const inside = P.z > 6.2;
+  W.self.visible = inside && mode !== 'os';
+  if (W.self.visible) { W.self.position.set(P.x, 0, P.z); W.self.rotation.y = P.yaw + Math.PI; }
+  if (inside || F.c3screens) { if (frame % 6 === 0) davCamRender(); if (frame % 3 === 0) drawDavScreens(); }
+}
+/* ---------- NPC generico ---------- */
+function spawnNpc(kind, x, z, rotY, label, fn) {
+  removeNpc();
+  const o = kind === 'ferri' ? { top: 0x5b3a6b, bottom: 0x3a3030, hair: 0x9a9a9a, bun: true, h: 0.93, glasses: true, skin: 0xe0b89a } : { top: 0xc99a1a, bottom: 0x1d2433, hair: 0x2b1a12, long: true, h: 0.96, skin: 0xe2b48f, phone: true };
+  const m = makePerson(o); m.position.set(x, 0, z); m.rotation.y = rotY; scene.add(m); W.npc = m; W.npcKind = kind;
+  I(m, label, fn); m.traverse(q => { if (q.isMesh) rayTargets.push(q); });
+  return m;
+}
+/* ---------- porta di casa, bagno, telefono ---------- */
+function frontDoor3() {
+  if (W.doorTarget > .5) { say('La porta di casa, aperta. Il pianerottolo odorava di pioggia e di polvere bagnata.'); return; }
+  if (!F.c3doorOk) { SFX.rattle(); say('Chiusa. Non ancora. Il narratore preferisce che tu legga prima i messaggi.'); return; }
+  W.doorTarget = 1.35; SFX.creak(); W.doorCol.on = false; W.thresholdCol.on = false;
+}
+function davBathUse() {
+  if (!F.c3bathOk) { SFX.rattle(); say(F.c3bathKnock ? 'La maniglia era fredda. Dall\'altra parte, qualcuno trattenne il respiro.' : 'Il bagno di Davide. Chiuso. Una sottile riga di luce sotto la porta.'); return; }
+  if (W.dbTarget > .5) { say('Il bagno era vuoto. Per quanto possa essere vuota una stanza in cui hai appena sentito bussare.'); return; }
+  W.dbTarget = 1.5; SFX.creak(); W.L.dbath.on = true; W.L.dbath.light.intensity = W.L.dbath.base; F.c3bathOpen = true; progress();
+}
+function davPhoneUse() {
+  if (!F.c3bathOpen) return;
+  if (F.c3call) { say('Il telefono di Davide. Schermo nero. Sul retro, un adesivo: un occhio aperto.'); return; }
+  F.c3callStart = true;
+}
+/* ---------- allestimento ---------- */
+function setupCh3() {
+  F.tapeOn = false; F.tapeRemoved = true; W.tape.visible = false;
+  F.wardUnlocked = true; F.wardOpen = true; F.boxRead = true; F.usb = (save.c2 && save.c2.usbTo) ? save.c2.usbTo === 'keep' : true; W.wTarget = W.wAng = 1.6;
+  drawMirror(false); drawDavMirror(false);
+  setLight('hall', true); setLight('monitor', false); setLight('dav', true); OS.booted = false;
+  P.x = 2.0; P.z = 4.8; P.yaw = Math.PI / 2; P.pitch = -0.05;
+  PHONE.photos = [
+    { src: imgMundane('contratto'), cap: `${REAL.dmy(REAL.ago(22))} · contratto firmato!! 🔑` },
+    { src: imgMundane('setup'), cap: `${REAL.dmy(REAL.ago(21))} · setup nuovo` },
+    { src: imgOldPhoto(), cap: `${REAL.dmy(REAL.yearAgo(1))} · 03:09 · Via dei Gelsi 15 — non ricordi di averla scattata` },
+  ];
+}
+/* ---------- la storia ---------- */
+async function chapter3(T) {
+  const n = NAME(), c2 = save.c2 || {};
+  setObjective(''); await T.wait(800); fadeIn(); setDrone(0.05, 4);
+  await T.say(`Erano le ${REAL.hm()}. ${n} era in piedi in mezzo al corridoio. Non ricordava di essersi alzato.`);
+  await T.say('Le scarpe erano bagnate. Di nuovo.');
+  T.later(1500, () => phoneReceive('Sara', 'Davide non è tornato.'));
+  T.later(5000, () => phoneReceive('Sara', 'La sua porta è ancora socchiusa. Dentro ci sono gli schermi accesi. Non ho il coraggio di entrare da sola.'));
+  T.later(9500, () => { phoneReceive('Sara', 'Sono sul pianerottolo. Apri.'); F.c3doorOk = true; spawnNpc('sara', -0.75, 5.9, Math.PI / 2, 'Parla con Sara', () => { F.c3saraTalk = true; }); SFX.knock(.6, 2); setObjective('Esci sul pianerottolo: Sara ti aspetta'); });
+  T.later(14000, () => phoneReceive('Mamma', 'Amore stasera non ti sento. Mi rispondi? Anche solo un pollice. 👍'));
+  await T.until('c3saraTalk');
+  mode = 'dialog'; unlockPointer(); const S_ = 'SARA', sc = '#ffd34d';
+  await talk(S_, ['Grazie. Sei pallido. Più di ieri.'], sc);
+  if (c2.usbTo === 'sara') await talk(S_, ['Ho letto la lista di Leo. Tutta. In fondo c\'è un nome che non dovrebbe esserci: "Ospite". Leo chiamava così quello che lo guardava senza farsi vedere.'], sc);
+  else if (c2.usbTo === 'ferri') await talk(S_, ['Hai dato la chiavetta alla Ferri. Lo so, me l\'ha detto lei. Sorridendo. Non so cosa ci farà. Non lo so più per nessuno, qui dentro.'], sc);
+  else await talk(S_, ['La chiavetta te la sei tenuta. Va bene. Ognuno in questo palazzo si tiene qualcosa.'], sc);
+  await talk(S_, ['Davide teneva un registro. Leo me ne parlava: "il vicino scrive tutto". Se c\'è una verità, è lì dentro.', 'Entra tu. Io resto qui. Se succede qualcosa… non lo so. Chiamami.'], sc);
+  mode = 'explore'; lockPointer();
+  W.d6Target = 1.25; SFX.creak(); setObjective('Entra nell\'interno 6');
+  await T.untilFn(() => P.z > 7.0);
+  netProgress({ step: 'c3_in' });
+  await T.say('L\'interno 6 era una stanza sola. Un materasso a terra, una scrivania. E un muro intero di schermi accesi.');
+  setObjective('Guardati intorno nell\'interno 6');
+  const found = () => ['c3screens', 'c3log', 'c3board', 'c3photo', 'c3hook'].filter(k => F[k]).length;
+  await Promise.race([T.untilFn(() => found() >= 3), T.wait(120000)]);
+  await T.wait(1500);
+  // ---- gli schermi ti guardano ----
+  F.c3allYou = true; SFX.buzz(); setDrone(0.14, 2);
+  const fw = { x: -Math.sin(P.yaw), z: -Math.cos(P.yaw) };
+  W.fig.visible = true; W.fig.position.set(clamp(P.x - fw.x * 1.1, -2.6, 2.2), 0, clamp(P.z - fw.z * 1.1, 6.9, 10)); W.fig.rotation.y = P.yaw; W.fig.userData.head.rotation.z = 0.35;
+  await T.say('Tutti gli schermi, insieme, mostrarono la stessa cosa. Questa stanza. Te, di spalle.', { glitch: true });
+  phoneReceive('Sara', 'non girarti');
+  await T.wait(1800); phoneReceive('Sara', 'guarda lo schermo in basso a destra. dietro di te.');
+  setObjective('Non girarti');
+  await T.wait(7000);
+  W.fig.visible = false; F.c3allYou = false; setDrone(0.06, 3);
+  phoneReceive('Sara', 'scusa. scusa. l\'ho visto dal telefono. sto guardando la tua diretta.');
+  await T.wait(2500);
+  await T.say('Non eri in diretta. Il PC era dall\'altra parte del muro, spento. Il narratore ne è quasi sicuro.');
+  await T.wait(1200); phoneReceive('Sara', 'come fai a non essere in diretta? ti vedo. ti vedo anche adesso.');
+  // ---- il bagno ----
+  await T.wait(3500);
+  F.c3bathKnock = true; SFX.knock(1, 3); try { navigator.vibrate && navigator.vibrate([100, 150, 100, 150, 100]); } catch (e) { }
+  await T.say('Tre colpi. Dalla porta del bagno di Davide. Da dentro.');
+  setObjective('Bussano dal bagno dell\'interno 6');
+  await T.wait(2500); F.c3bathOk = true;
+  await T.until('c3bathOpen');
+  drawDavMirror(true); SFX.sting();
+  await T.say('Vuoto. Sullo specchio, scritto con qualcosa di rosso: OSPITE.');
+  await T.wait(800);
+  const ring = setInterval(() => { SFX.ping(); try { navigator.vibrate && navigator.vibrate(200); } catch (e) { } }, 1300); T.timers.push(ring);
+  await T.say('Sul lavandino, il telefono di Davide si illuminò. Chiamata in arrivo. Il numero era il tuo.');
+  setObjective('Rispondi al telefono di Davide');
+  await T.until('c3callStart'); clearInterval(ring);
+  mode = 'dialog'; unlockPointer(); const D_ = 'DAVIDE — MESSAGGIO VOCALE', dc = '#ffb86b';
+  await talk(D_, ['…ciao, vicino. Se senti questo, sei entrato. Lo sapevo. Entri sempre.', 'Un anno fa ti ho visto sulle scale. Bagnato. Con le chiavi del sette in mano. Ti ho salutato, e tu mi hai chiamato per nome.', 'Io il mio nome non te l\'avevo mai detto.', 'Da allora ti guardo. Non per farti del male. Per ricordarmi com\'eri. Perché tu non te lo ricordi.', 'Non sono io quello che guarda te. Sei tu che guardi tutti noi. Da quella finestra di fronte. Da un anno.'], dc);
+  await talk('', ['Il messaggio finiva con un fruscio. Poi una voce, vicinissima al microfono. Somigliava alla tua.', '«Cancellalo.»'], '#ff2a4a');
+  const del = await dialog('', 'Il telefono chiedeva: eliminare il messaggio?', ['Cancella', 'Conservalo']);
+  F.c3msg = del === 0 ? 'deleted' : 'kept'; F.c3call = true;
+  await talk('', [del === 0 ? 'Messaggio eliminato. Il narratore non ha visto niente. Il narratore, d\'ora in poi, vedrà sempre meno.' : 'Messaggio conservato. Il telefono di Davide, adesso, era nella tua tasca. Accanto al tuo. Pesavano uguale.'], '#c9a0ff');
+  mode = 'explore'; lockPointer();
+  // ---- Sara, la foto ----
+  spawnNpc('sara', -1.6, 7.2, 0, 'Sara', () => { });
+  await T.wait(1200); SFX.step();
+  await T.say('Quando uscisti dal bagno, Sara era dentro l\'appartamento. In mano, la foto del frigo.');
+  mode = 'dialog'; unlockPointer();
+  await talk(S_, ['Te l\'avevo detto, ieri. Questa.', 'Il portone. La pioggia. Uno col cappuccio e il telefono alzato verso la finestra di Leo. Guarda la data.'], sc);
+  const ans = await dialog(S_, 'Sei tu?', ['Non sono io', 'Non me lo ricordo', 'Fammi guardare meglio'], sc);
+  F.c3answer = ['deny', 'forget', 'look'][ans];
+  await talk(S_, [[
+    'Ok. Ok. Allora dimmi chi ha la tua giacca. E le tue scarpe. E il tuo modo di stare in piedi, con la spalla sinistra un po\' più bassa.',
+    'Leo diceva la stessa cosa. "Non me lo ricordo." L\'ultima volta che l\'ha detto, era al telefono con me. Alle tre di notte.',
+    'Guarda. Il telefono alzato. Sta filmando. E nella mano libera, le chiavi. Un portachiavi a forma di occhio.'][ans]], sc);
+  mode = 'explore'; lockPointer();
+  // ---- la Ferri ----
+  F.c3ferriStairs = true; await T.wait(1200); SFX.step(); await T.wait(600); SFX.step();
+  await T.say('Passi sulle scale. Lenti. Sugli schermi, la sagoma di una donna con il cardigan.');
+  await T.wait(1500);
+  const sara = W.npc; removeNpc(); const sm = makePerson({ top: 0xc99a1a, bottom: 0x1d2433, hair: 0x2b1a12, long: true, h: 0.96, skin: 0xe2b48f, phone: true }); sm.position.set(-1.0, 0, 7.4); sm.rotation.y = -0.6; scene.add(sm); W.c3sara = sm;
+  spawnNpc('ferri', -1.6, 6.0, 0, 'Sig.ra Ferri', () => { });
+  mode = 'dialog'; unlockPointer(); const F_ = 'SIG.RA FERRI', fc = '#c9a0ff';
+  await talk(F_, ['Ragazzi. Uscite da lì. Quella casa non è vostra.', 'Signorina, lei non si chiama Sara. Ho visto il suo documento quando è salita la prima volta. Nel cognome non c\'è nessuna R.'], fc);
+  await talk(S_, ['E lei come fa a vedere i documenti della gente?'], sc);
+  await talk(F_, ['Ho le chiavi di tutto, cara. Anche dei cassetti.'], fc);
+  await talk(S_, ['Allora mi dica dov\'è Davide.'], sc);
+  await talk(F_, ['Davide è andato a cercare la verità dove qualcuno l\'ha lasciata. Dall\'altra parte della strada. Civico 15, interno 7.', 'La chiave l\'aveva lui. Era appesa lì, vicino alla porta. Chiedete a lui dove l\'ha messa.'], fc);
+  await talk('', ['La Ferri non guardava Sara. Guardava te.'], '#c9a0ff');
+  mode = 'explore'; lockPointer();
+  await T.say('Il gancio vicino alla porta era vuoto. "15/7".');
+  await T.say('La chiave con il portachiavi a forma di occhio. Era nella tua ciotola da ieri. Il narratore non sa come ci sia arrivata. Il narratore comincia a non volerlo sapere.', { glitch: true });
+  removeNpc(); if (W.c3sara) { scene.remove(W.c3sara); W.c3sara = null; } W.d6Target = 1.25;
+  await T.say('Quando ti girasti, il pianerottolo era vuoto. Sara e la Ferri se n\'erano andate. Insieme, o ognuna per conto suo.');
+  // ---- ritorno a casa ----
+  setObjective('Torna a casa');
+  await T.untilFn(() => P.x > 0.4 && P.z < 5.6);
+  W.doorTarget = 0; W.doorCol.on = true; W.thresholdCol.on = true; SFX.slam(); await T.wait(500); SFX.rattle();
+  await T.say('La porta si chiuse alle tue spalle. Due mandate. Dall\'esterno.');
+  setLight('monitor', true); SFX.boot();
+  await T.say('Nella stanza, il PC si accese da solo.');
+  OS.booted = true; OS.logged = true; F.pcLogged = true;
+  setObjective('Siediti al PC');
+  await T.untilFn(() => OS.open && $('#wins'));
+  await T.wait(400);
+  F.lockSeat = true; STREAM.live = true; STREAM.view = 'ext'; STREAM.occ = true; STREAM.frozen = true; STREAM.viewers = 1; STREAM.vTarget = 1; STREAM.hist = [];
+  if (!OS.lc) openLivecast(); else OS.lc.msgs.innerHTML = '';
+  setDrone(0.15, 3); SFX.sting();
+  const O = async (t, ms = 2700) => { await T.wait(ms); chatPost(OCC, t); };
+  await O('bentornato a casa.', 1500);
+  await O('quale delle due?');
+  await O('davide ti ha lasciato un messaggio. ' + (F.c3msg === 'deleted' ? 'l\'hai cancellato. come l\'ultima volta.' : 'l\'hai tenuto. non cambierà niente.'));
+  await O('sara non si chiama sara. la ferri non dorme mai. davide non è tornato.');
+  await O('e tu non sei mai andato via.');
+  await O('domani attraversi la strada.', 3200);
+  await O('la chiave ce l\'hai. ce l\'hai sempre avuta.', 3000);
+  await T.wait(3500); fadeOut(); await T.wait(1800); F.lockSeat = false;
+  save.c3 = { answer: F.c3answer, msg: F.c3msg }; persist();
+  endChapter('c3_' + F.c3answer);
 }
 
 /* =========================================================
@@ -2223,6 +2514,9 @@ const ENDINGS = {
   live: { ch: 1, t: 'IN DIRETTA', d: 'Hai fatto la tua prima diretta. Qualcuno l\'ha guardata più degli altri. Qualcuno non ha mai smesso.' },
   sleep: { ch: 1, t: 'IL SONNO DEI GIUSTI', d: 'Hai scelto di dormire. Nessuna diretta, nessuna chat, nessuno a guardare. Quasi nessuno.' },
   stairs: { ch: 1, t: 'LE SCALE', d: 'Hai provato ad andartene. Le scale scendevano. E scendevano. E tornavano sempre allo stesso pianerottolo.' },
+  c3_deny: { ch: 3, t: 'NON SONO IO', d: 'Hai detto a Sara che non eri tu. Lei ha annuito e ha messo la foto in tasca. Non l\'ha più tirata fuori. Non davanti a te.' },
+  c3_forget: { ch: 3, t: 'BUCHI', d: 'Hai detto che non ricordi. È la cosa più vera che hai detto finora. È anche la più pericolosa.' },
+  c3_look: { ch: 3, t: 'GUARDARE MEGLIO', d: 'Hai chiesto di guardare meglio. Nella foto la figura sotto la pioggia ha il telefono alzato. Sta filmando la finestra di Leo. Ha la tua giacca.' },
   c2_sara: { ch: 2, t: 'LA SORELLA', d: 'Hai dato la chiavetta a Sara. Adesso lei sa chi guardava Leo. Tu, invece, preferisci non saperlo.' },
   c2_ferri: { ch: 2, t: 'LA PADRONA DI CASA', d: 'Hai dato la chiavetta alla signora Ferri. Lei custodisce tutto: le chiavi, le registrazioni, gli inquilini. Anche quelli di prima.' },
   c2_keep: { ch: 2, t: 'LA COPIA', d: 'Hai tenuto la chiavetta di Leo. La lista degli spettatori è al sicuro. Il tuo nome, però, ci compare due volte.' },
@@ -2230,9 +2524,10 @@ const ENDINGS = {
 const CHAPTERS = [
   { n: 1, t: 'In Diretta', d: 'La prima diretta. Qualcuno guarda più degli altri.' },
   { n: 2, t: 'La Padrona di Casa', d: 'Il giorno dopo. Chi ha le chiavi di casa tua?' },
-  { n: 3, t: 'Interno 6', d: 'In arrivo.', soon: true },
+  { n: 3, t: 'Interno 6', d: 'Davide non è tornato. La sua porta è aperta.' },
+  { n: 4, t: 'Civico 15', d: 'In arrivo.', soon: true },
 ];
-const unlockedCh = () => Math.max(save.chapter || 1, save.endings.includes('live') ? 2 : 1);
+const unlockedCh = () => Math.max(save.chapter || 1, save.endings.includes('live') ? 2 : 1, save.endings.some(k => k.startsWith('c2_')) ? 3 : 1);
 async function sleepEnding() {
   const T = RUN; F.ending = true; mode = 'cut'; fadeOut();
   await T.wait(1600); clearSubs();
@@ -2256,7 +2551,7 @@ async function endChapter(kind) {
   $('#hud').classList.add('hidden'); $('#mobile').classList.add('hidden'); $('#phone').classList.add('hidden'); $('#dialog').classList.add('hidden'); $('#peep').classList.add('hidden');
   if (!save.endings.includes(kind)) save.endings.push(kind); persist();
   netProgress({ ending: kind, endings: save.endings.join(',') });
-  if (kind === 'live') save.chapter = Math.max(save.chapter || 1, 2); persist();
+  if (kind === 'live') save.chapter = Math.max(save.chapter || 1, 2); if (ENDINGS[kind].ch >= 2) save.chapter = Math.max(save.chapter || 1, ENDINGS[kind].ch + 1); persist();
   const e = ENDINGS[kind]; const secs = Math.round((performance.now() - S.start) / 1000);
   const chEnds = Object.keys(ENDINGS).filter(k => ENDINGS[k].ch === CH), gotN = chEnds.filter(k => save.endings.includes(k)).length;
   const totIns = Object.values(S.insp).reduce((a, b) => a + b, 0);
@@ -2265,14 +2560,14 @@ async function endChapter(kind) {
    <div class="num" id="endNum"></div>
    <div style="font:600 11px Inter;letter-spacing:.2em;color:#666;margin-top:18px">LASCIA UN MESSAGGIO NELLA CHAT DI CHI GIOCHERÀ DOPO DI TE</div>
    <form class="leave" id="leaveF"><input maxlength="120" placeholder="apparirà col tuo nome: ${esc(NAME())}"><button class="btn" type="submit">INVIA</button></form>
-   <div class="btns"><button class="btn" id="eMenu">MENU PRINCIPALE</button><button class="btn" id="eAgain">RIGIOCA</button>${CH === 1 && unlockedCh() >= 2 ? '<button class="btn" id="eNext" style="border-color:var(--red);color:#fff">CAPITOLO 2 ›</button>' : ''}</div>
-   <div class="teaser">${CH === 1 ? (unlockedCh() >= 2 ? 'Capitolo 2 — <i>La Padrona di Casa</i> — è sbloccato.' : 'Finisci la diretta per sbloccare il Capitolo 2.') : 'Capitolo 3 — <i>Interno 6</i> — in arrivo.'}<br>occhio_aperto sta guardando questa schermata.</div>`;
+   <div class="btns"><button class="btn" id="eMenu">MENU PRINCIPALE</button><button class="btn" id="eAgain">RIGIOCA</button>${CHAPTERS[CH] && !CHAPTERS[CH].soon && unlockedCh() > CH ? `<button class="btn" id="eNext" style="border-color:var(--red);color:#fff">CAPITOLO ${CH + 1} ›</button>` : ''}</div>
+   <div class="teaser">${CH === 1 ? (unlockedCh() >= 2 ? 'Capitolo 2 — <i>La Padrona di Casa</i> — è sbloccato.' : 'Finisci la diretta per sbloccare il Capitolo 2.') : CHAPTERS[CH] ? `Capitolo ${CH + 1} — <i>${CHAPTERS[CH].t}</i> — ${CHAPTERS[CH].soon ? 'in arrivo' : 'è sbloccato'}.` : 'Fine.'}<br>occhio_aperto sta guardando questa schermata.</div>`;
   $('#ending').classList.remove('hidden'); $('#fade').style.transition = 'opacity 1.2s'; $('#fade').style.opacity = 0;
   $('#leaveF').onsubmit = ev => { ev.preventDefault(); const i = ev.target.querySelector('input'); const v = i.value.trim(); if (!v) return; lastNetChat = 0; netChat(v); i.value = ''; i.placeholder = 'inviato. qualcuno lo leggerà stanotte.'; i.disabled = true; SFX.unlock(); };
   $('#leaveF input').onkeydown = ev => ev.stopPropagation();
   $('#eMenu').onclick = () => { $('#ending').classList.add('hidden'); toMenu(); };
   $('#eAgain').onclick = () => { $('#ending').classList.add('hidden'); startGame(CH); };
-  const en = $('#eNext'); if (en) en.onclick = () => { $('#ending').classList.add('hidden'); playIntro(2); };
+  const en = $('#eNext'); if (en) en.onclick = () => { $('#ending').classList.add('hidden'); playIntro(CH + 1); };
   if (kind === 'live') { const nn = await netFinish(); $('#endNum').textContent = nn ? `Sei la persona n° ${nn} ad aver finito il Capitolo 1. Lui le ricorda tutte.` : 'Lui si ricorderà di te.'; }
 }
 
@@ -2378,7 +2673,7 @@ $('#nameOk').onclick = () => {
 async function playIntro(ch = 1) {
   const el = $('#intro'), t = el.querySelector('.t'); el.classList.remove('hidden'); $('#skip').classList.remove('hidden');
   let skipped = false; $('#skip').onclick = () => { skipped = true; };
-  const lines = ch === 2 ? [`${REAL.dm()} ${REAL.now().getFullYear()}. Il giorno dopo.`, 'Non ricordi di essere andato a letto.', 'Ricordi la webcam. Ricordi una faccia, troppo vicina. Poi più niente.', 'LIVEcast dice che la diretta è finita alle 03:11.', 'Il PC dice di no.'] : [`${REAL.dm()} ${REAL.now().getFullYear()}.`, 'Tre settimane fa ti sei trasferito in via dei Gelsi 14, interno 7. Un bilocale arredato, a un prezzo troppo basso per farsi domande.', 'Fai lo streamer. La chat è il tuo lavoro, la tua compagnia, il tuo pubblico.', 'Stanotte farai la tua prima vera diretta.', 'Qualcuno, stanotte, ti guarderà più degli altri.'];
+  const lines = ch === 3 ? [`${REAL.dm()} ${REAL.now().getFullYear()}. La terza notte.`, 'Davide non è tornato a casa.', 'La sua porta è rimasta socchiusa. Dalla fessura, la luce azzurra di molti schermi.', 'Sara dice che ha paura di entrare da sola.', 'Tu, invece, hai paura di sapere già cosa c\'è dentro.'] : ch === 2 ? [`${REAL.dm()} ${REAL.now().getFullYear()}. Il giorno dopo.`, 'Non ricordi di essere andato a letto.', 'Ricordi la webcam. Ricordi una faccia, troppo vicina. Poi più niente.', 'LIVEcast dice che la diretta è finita alle 03:11.', 'Il PC dice di no.'] : [`${REAL.dm()} ${REAL.now().getFullYear()}.`, 'Tre settimane fa ti sei trasferito in via dei Gelsi 14, interno 7. Un bilocale arredato, a un prezzo troppo basso per farsi domande.', 'Fai lo streamer. La chat è il tuo lavoro, la tua compagnia, il tuo pubblico.', 'Stanotte farai la tua prima vera diretta.', 'Qualcuno, stanotte, ti guarderà più degli altri.'];
   for (const l of lines) { if (skipped) break; t.textContent = ''; for (let i = 0; i <= l.length && !skipped; i++) { t.textContent = l.slice(0, i); if (i % 3 === 0) SFX.type(); await wait(32); } await wait(1600); }
   if (!skipped) { t.innerHTML = `<div class="chap"><small>CAPITOLO ${ch}</small>${CHAPTERS[ch - 1].t}</div>`; SFX.sting(); await wait(2600); }
   el.classList.add('hidden'); $('#skip').classList.add('hidden'); startGame(ch);
@@ -2395,16 +2690,17 @@ function resetWorld() {
   P.x = 2.2; P.z = 2.9; P.yaw = 0; P.pitch = -0.05;
   PHONE.photos = []; PHONE.tab = 'msg'; PHONE.view = null; PHONE.cur = null; W.tvOn = false; removeNpc(); OS.vid = null; OS.frame = null; phoneBadge(); $('#mTorch').classList.remove('on');
   STREAM.view = 'game';
+  W.d6Target = W.d6Ang = 0; W.dbTarget = W.dbAng = 0; W.self.visible = false; F.c3allYou = false; setLight('dav', false); setLight('dbath', false); drawDavMirror(false); if (W.c3sara) { scene.remove(W.c3sara); W.c3sara = null; }
 }
 function startGame(ch = 1) {
-  if (RUN) RUN.kill(); clearSubs(); CH = ch; resetWorld(); if (ch === 2) setupCh2();
+  if (RUN) RUN.kill(); clearSubs(); CH = ch; resetWorld(); if (ch === 2) setupCh2(); if (ch === 3) setupCh3();
   save.prevPlay = save.lastPlay || null; save.lastPlay = Date.now(); save.runs++; persist(); netProgress({ runs: save.runs, last: Date.now() });
   $('#menu').classList.add('hidden'); $('#hud').classList.remove('hidden'); if (isTouch) $('#mobile').classList.remove('hidden');
   $('#hint').style.opacity = 1; $('#hint').textContent = '';
   $('#fade').style.transition = 'none'; $('#fade').style.opacity = 1;
   mode = 'explore'; S.start = performance.now(); progress(); setDrone(0.02, 3);
   if (!isTouch) lockPointer();
-  RUN = new Run(); (ch === 2 ? chapter2 : chapter1)(RUN); netProgress({ chapter: ch });
+  RUN = new Run(); (ch === 3 ? chapter3 : ch === 2 ? chapter2 : chapter1)(RUN); netProgress({ chapter: ch });
 }
 
 /* =========================================================
@@ -2412,6 +2708,10 @@ function startGame(ch = 1) {
 ========================================================= */
 const clock = new THREE.Clock(); let frame = 0, lightningT = 12, monT = 0, nagIdx = 0;
 const NAGS = {
+  'Esci sul pianerottolo: Sara ti aspetta': ['Sara aspettava sul pianerottolo. La porta di casa, stanotte, si apriva.'],
+  'Guardati intorno nell\'interno 6': ['Gli schermi, il registro sulla scrivania, la bacheca, il frigo. L\'interno 6 aveva molto da dire.'],
+  'Rispondi al telefono di Davide': ['Il telefono sul lavandino del bagno continuava a squillare. Con il tuo numero.'],
+  'Torna a casa': ['Casa tua era dall\'altra parte del pianerottolo. Due passi. Sembravano di più.'],
   'Controlla il PC': ['Il PC. Ti aspettava anche stanotte. Ti aspetta sempre.'],
   'Apri la registrazione della diretta (Esplora file → Video)': ['La registrazione. Il narratore non l\'ha guardata. Preferirebbe che la guardassi tu per primo.'],
   'Apri le foto del telefono': ['Il telefono. La galleria. Il narratore insiste, purtroppo.'],
@@ -2456,6 +2756,8 @@ function update(dt) {
   // porte
   W.doorAng += (W.doorTarget - W.doorAng) * Math.min(1, dt * 3); W.frontDoor.rotation.y = W.doorAng;
   W.bathAng += (W.bathTarget - W.bathAng) * Math.min(1, dt * (W.bathTarget === 0 ? 9 : 3)); W.bathDoor.rotation.y = W.bathAng; W.bathCol.on = W.bathAng < 0.3;
+  W.d6Ang += (W.d6Target - W.d6Ang) * Math.min(1, dt * 2.5); W.d6.rotation.y = W.d6Ang; W.d6Col.on = W.d6Ang < 0.3;
+  W.dbAng += (W.dbTarget - W.dbAng) * Math.min(1, dt * 3); W.dbDoor.rotation.y = W.dbAng; W.dbCol.on = W.dbAng < 0.3;
   W.wAng += (W.wTarget - W.wAng) * Math.min(1, dt * 2.5); W.wDoorL.rotation.y = W.wAng; W.wDoorR.rotation.y = -W.wAng;
   // pioggia, luci vive
   W.rainTex.offset.y += dt * 0.25;
@@ -2474,8 +2776,9 @@ function update(dt) {
   chatTick(dt);
   if (frame % 15 === 0) updateLC();
   if (W.tvOn && frame % 3 === 0) drawTV();
+  if (CH === 3) davTick(dt);
   if (OS.vid && OS.wins.vid && frame % 2 === 0) drawVid();
-  const needCam = (OS.open && (OS.lc || OS.wins.vid)) || (mode === 'explore' && Math.hypot(P.x - 2.4, P.z - 0.5) < 3.5);
+  const needCam = (CH === 3 && P.z > 6.2) || (OS.open && (OS.lc || OS.wins.vid)) || (mode === 'explore' && Math.hypot(P.x - 2.4, P.z - 0.5) < 3.5);
   if (needCam && frame % (HIGH ? 2 : 3) === 0) renderWebcam();
   if ((OS.lc || STREAM.live) && frame % 2 === 0) drawPreview(dt * 2);
   monT -= dt; if (monT <= 0) { monT = 0.25; drawMonitors(); }
