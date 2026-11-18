@@ -23,7 +23,19 @@ input,textarea{user-select:text;-webkit-user-select:text;font-family:inherit}
 button{font-family:inherit;cursor:pointer}
 .hidden{display:none!important}
 #c{position:fixed;inset:0;width:100%;height:100%;display:block}
-#grain{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;opacity:.07;mix-blend-mode:screen;image-rendering:pixelated;z-index:90}
+/* effetto VHS: grana fine, linee di scansione, banda di tracking, leggero tremolio e bordi colorati */
+#grain{position:fixed;inset:-50%;width:200%;height:200%;pointer-events:none;opacity:.075;mix-blend-mode:overlay;z-index:90;background-size:160px 160px;animation:grainMove .9s steps(7) infinite}
+@keyframes grainMove{0%{transform:translate(0,0)}15%{transform:translate(-4%,3%)}30%{transform:translate(3%,-5%)}45%{transform:translate(-6%,-2%)}60%{transform:translate(5%,4%)}75%{transform:translate(-2%,6%)}90%{transform:translate(6%,-3%)}100%{transform:translate(0,0)}}
+#vhs{position:fixed;inset:0;pointer-events:none;z-index:89;overflow:hidden}
+#vhs .scan{position:absolute;inset:0;background:repeating-linear-gradient(180deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);mix-blend-mode:multiply;animation:vhsFlicker 4.2s infinite}
+#vhs .track{position:absolute;left:-2%;right:-2%;height:9vh;top:-12vh;background:linear-gradient(180deg,transparent,rgba(255,255,255,.035) 30%,rgba(255,255,255,.08) 50%,rgba(255,255,255,.035) 70%,transparent);mix-blend-mode:screen;filter:blur(1px);animation:vhsTrack 7.5s linear infinite}
+#vhs .track::after{content:"";position:absolute;inset:40% 0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.07) 0 2px,transparent 2px 9px)}
+#vhs .fringe{position:absolute;inset:0;box-shadow:inset 3px 0 0 rgba(255,0,60,.05),inset -3px 0 0 rgba(0,200,255,.05),inset 0 0 120px rgba(0,0,0,.35)}
+#vhs .osd{position:absolute;right:max(24px,env(safe-area-inset-right));bottom:74px;font:22px VT323,monospace;color:rgba(235,235,235,.55);letter-spacing:.08em;text-shadow:1px 0 0 rgba(255,0,60,.5),-1px 0 0 rgba(0,200,255,.5);display:none}
+body.inmenu #vhs .osd{display:block}
+@keyframes vhsTrack{0%{transform:translateY(0)}100%{transform:translateY(130vh)}}
+@keyframes vhsFlicker{0%,100%{opacity:.85}48%{opacity:.85}50%{opacity:.6}52%{opacity:.9}80%{opacity:.8}}
+body.novhs #vhs,body.novhs #grain{display:none}
 #vignette{position:fixed;inset:0;pointer-events:none;z-index:4;background:radial-gradient(ellipse at center,transparent 42%,rgba(0,0,0,.8) 100%)}
 #fade{position:fixed;inset:0;background:#000;pointer-events:none;z-index:80;opacity:1;transition:opacity 1.2s}
 #flash{position:fixed;inset:0;background:#b00018;pointer-events:none;z-index:85;opacity:0;mix-blend-mode:multiply}
@@ -363,7 +375,8 @@ body.mobile:not(.portrait) .lc .chat form input{padding:6px 8px;font-size:12px}
 <body>
 <canvas id="c"></canvas>
 <div id="vignette"></div>
-<canvas id="grain" width="160" height="90"></canvas>
+<div id="grain"></div>
+<div id="vhs"><div class="scan"></div><div class="track"></div><div class="fringe"></div><div class="osd">▶ PLAY</div></div>
 <div id="flash"></div>
 
 <div id="loading"><div>CARICAMENTO</div><div class="bar"><i></i></div><div style="font-size:14px;color:#444">indossa le cuffie</div></div>
@@ -451,6 +464,7 @@ body.mobile:not(.portrait) .lc .chat form input{padding:6px 8px;font-size:12px}
   <label>VOLUME</label><input type="range" id="oVol" min="0" max="1" step="0.05">
   <label>PIOGGIA</label><input type="range" id="oRain" min="0" max="1" step="0.05">
   <label>SENSIBILITÀ VISUALE</label><input type="range" id="oSens" min="0.3" max="2.5" step="0.1">
+  <label>EFFETTO VHS</label><div class="row"><button data-vhs="1">Attivo</button><button data-vhs="0">Spento</button></div>
   <label>QUALITÀ GRAFICA (ricarica)</label><div class="row"><button data-q="low">Bassa</button><button data-q="high">Alta</button></div>
   <label>LINGUA</label><div class="row"><button data-lang="it">Italiano</button><button data-lang="en">English</button></div>
   <label>COMANDI</label>
@@ -463,7 +477,7 @@ body.mobile:not(.portrait) .lc .chat form input{padding:6px 8px;font-size:12px}
 <div id="credPanel" class="panel hidden"><div class="in"><h2>Crediti</h2>
   <p><b>OCCHIO APERTO</b> — un creepypasta interattivo in più capitoli.</p>
   <p>Ogni nome che vedi nella chat appartiene a qualcuno che ha giocato prima di te. Ogni messaggio lasciato alla fine del capitolo può comparire nella diretta di qualcun altro.</p>
-  <p style="color:#666">Motore: Three.js · Server: Firebase Realtime Database · Suoni generati in tempo reale.</p>
+  <p style="color:#888">Sviluppato da <b>AgonyApp Studio</b>.</p>
   <div style="text-align:center;margin-top:16px"><button class="btn" data-close>CHIUDI</button></div></div></div>
 
 <div id="ending" class="hidden"><div class="in" id="endIn"></div></div>
@@ -548,11 +562,12 @@ const pName = n => LANG === 'en' && PHONE_NAMES[n] ? PHONE_NAMES[n] : n;
   T('#nameScreen h2', 'What\'s your name?'); T('#nameScreen p', 'Your name will be used in the story. And someone else, sooner or later, will read it in their chat.'); T('#nameIn', 'your name', 'placeholder'); T('#nameOk', 'ENTER');
   T('#skip', 'SKIP ›'); T('#pause h2', 'Paused'); T('#pRes', 'RESUME'); T('#pOpt', 'OPTIONS'); T('#pMenu', 'MAIN MENU');
   T('#options h2', 'Options');
-  const lab = document.querySelectorAll('#options label'); const lt = ['VOLUME', 'RAIN', 'LOOK SENSITIVITY', 'GRAPHICS QUALITY (reloads)', 'LANGUAGE', 'CONTROLS']; lab.forEach((l, k) => { if (lt[k]) l.textContent = lt[k]; });
+  const lab = document.querySelectorAll('#options label'); const lt = ['VOLUME', 'RAIN', 'LOOK SENSITIVITY', 'VHS EFFECT', 'GRAPHICS QUALITY (reloads)', 'LANGUAGE', 'CONTROLS']; lab.forEach((l, k) => { if (lt[k]) l.textContent = lt[k]; });
+  T('#options [data-vhs="1"]', 'On'); T('#options [data-vhs="0"]', 'Off');
   T('#options [data-q="low"]', 'Low'); T('#options [data-q="high"]', 'High');
   T('#oHelp', 'PC: <b>WASD</b> move · <b>Mouse</b> look · <b>E / click</b> interact · <b>Shift</b> run · <b>F</b> flashlight · <b>Tab</b> phone · <b>Esc</b> pause · <b>F11</b> full screen<br>Mobile: joystick on the left, drag on the right to look, <b>USE</b> to interact.');
   T('#oClose', 'CLOSE'); T('[data-close]', 'CLOSE'); T('#chapPanel h2', 'Chapters'); T('#endsPanel h2', 'Endings');
-  T('#credPanel .in', '<h2>Credits</h2><p><b>OCCHIO APERTO</b> — an interactive creepypasta in several chapters.</p><p>Every name you see in the chat belongs to someone who played before you. Every message left at the end of a chapter can appear in someone else\'s stream.</p><p style="color:#666">Engine: Three.js · Server: Firebase Realtime Database · Sounds generated in real time.</p><div style="text-align:center;margin-top:16px"><button class="btn" data-close>CLOSE</button></div>');
+  T('#credPanel .in', '<h2>Credits</h2><p><b>OCCHIO APERTO</b> — an interactive creepypasta in several chapters.</p><p>Every name you see in the chat belongs to someone who played before you. Every message left at the end of a chapter can appear in someone else\'s stream.</p><p style="color:#888">Developed by <b>AgonyApp Studio</b>.</p><div style="text-align:center;margin-top:16px"><button class="btn" data-close>CLOSE</button></div>');
   T('#loading > div:first-child', 'LOADING'); T('#loading > div:last-child', 'wear headphones');
 })();
 const isTouch = matchMedia('(pointer:coarse)').matches || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
@@ -2704,6 +2719,7 @@ $('#pRes').onclick = closePause; $('#pMenu').onclick = () => { $('#pause').class
 $('#pOpt').onclick = () => openOptions(); $('#bOpt').onclick = () => { initAudio(); openOptions(); };
 function openOptions() {
   const o = $('#options'); o.classList.remove('hidden'); $('#oVol').value = save.vol; $('#oRain').value = save.rain ?? 0.6; $('#oSens').value = save.sens;
+  o.querySelectorAll('[data-vhs]').forEach(b => { b.classList.toggle('on', (b.dataset.vhs === '1') === (save.vhs !== false)); b.onclick = () => { setVHS(b.dataset.vhs === '1'); persist(); o.querySelectorAll('[data-vhs]').forEach(x => x.classList.toggle('on', x === b)); SFX.click(); }; });
   o.querySelectorAll('[data-lang]').forEach(b => { b.classList.toggle('on', b.dataset.lang === LANG); b.onclick = () => { if (b.dataset.lang === LANG) return; save.lang = b.dataset.lang; persist(); location.reload(); }; });
   o.querySelectorAll('[data-q]').forEach(b => { b.classList.toggle('on', b.dataset.q === save.quality); b.onclick = () => { save.quality = b.dataset.q; persist(); location.reload(); }; });
 }
@@ -2737,7 +2753,7 @@ function toMenu() {
   if (RUN) RUN.kill(); clearSubs(); unlockPointer();
   mode = 'menu'; resetWorld();
   ['#hud', '#mobile', '#os', '#phone', '#dialog', '#peep', '#note', '#ending'].forEach(s => $(s).classList.add('hidden'));
-  OS.open = false; $('#menu').classList.remove('hidden'); fadeIn(); setDrone(0.04, 2);
+  OS.open = false; $('#menu').classList.remove('hidden'); document.body.classList.add('inmenu'); fadeIn(); setDrone(0.04, 2);
   $('#bCont').disabled = !save.name; $('#bCont').textContent = save.name ? L(`Continua come ${save.name}`, `Continue as ${save.name}`) + (unlockedCh() > 1 ? L(' · cap. ', ' · ch. ') + unlockedCh() : '') : L('Continua', "Continue");
 }
 $('#bNew').onclick = () => { initAudio(); SFX.click(); $('#menu').classList.add('hidden'); $('#nameScreen').classList.remove('hidden'); const i = $('#nameIn'); i.value = save.name || ''; setTimeout(() => i.focus(), 100); };
@@ -2773,6 +2789,7 @@ function resetWorld() {
   W.d6Target = W.d6Ang = 0; W.dbTarget = W.dbAng = 0; W.self.visible = false; F.c3allYou = false; setLight('dav', false); setLight('dbath', false); drawDavMirror(false); if (W.c3sara) { scene.remove(W.c3sara); W.c3sara = null; }
 }
 function startGame(ch = 1) {
+  document.body.classList.remove('inmenu');
   if (RUN) RUN.kill(); clearSubs(); CH = ch; resetWorld();
   W.L.dav.light.visible = W.L.dbath.light.visible = ch === 3; W.L.tv.light.visible = ch === 2; if (ch === 2) setupCh2(); if (ch === 3) setupCh3();
   save.prevPlay = save.lastPlay || null; save.lastPlay = Date.now(); save.runs++; persist(); netProgress({ runs: save.runs, last: Date.now() });
@@ -2892,8 +2909,10 @@ function drawMonitors() {
   W.chTex.needsUpdate = true;
 }
 // grana
-const grainC = $('#grain'), grainG = grainC.getContext('2d'), grainImg = grainG.createImageData(160, 90);
-function drawGrain() { const d = grainImg.data; for (let i = 0; i < d.length; i += 4) { const v = Math.random() * 255; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255; } grainG.putImageData(grainImg, 0, 0); }
+(function makeGrain() { const c = document.createElement('canvas'); c.width = c.height = 160; const g = c.getContext('2d'), im = g.createImageData(160, 160); for (let i = 0; i < im.data.length; i += 4) { const v = Math.random() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; } g.putImageData(im, 0, 0); $('#grain').style.backgroundImage = `url(${c.toDataURL()})`; })();
+const setVHS = on => { save.vhs = on; document.body.classList.toggle('novhs', !on); };
+setVHS(save.vhs !== false);
+
 // occhio del menu
 const pupil = document.getElementById('pupil'), lid = document.getElementById('lid');
 addEventListener('pointermove', e => { if (mode !== 'menu') return; const dx = (e.clientX / innerWidth - .5) * 26, dy = (e.clientY / innerHeight - .5) * 14; pupil.setAttribute('transform', `translate(${dx},${dy})`); });
@@ -2905,7 +2924,6 @@ function loop() {
   update(dt);
   if (SHADOWS && frame % 2 === 0) renderer.shadowMap.needsUpdate = true;
   if (!OS.open) renderer.render(scene, mode === 'peep' ? peepCam : camera);
-  if (frame % 2 === 0) drawGrain();
 }
 
 /* =========================================================
