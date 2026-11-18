@@ -6,6 +6,9 @@ on:
     branches: [main]
     paths: ['index.html', 'icon-512.png', 'desktop/**', '.github/workflows/desktop.yml']
 
+permissions:
+  contents: write
+
 jobs:
   windows:
     runs-on: windows-latest
@@ -26,3 +29,16 @@ jobs:
             desktop/dist/*.zip
             desktop/dist/*-portable.exe
           retention-days: 30
+      - name: Pubblica la release "windows" (link fissi usati dal sito)
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd dist
+          cp *-win-x64.zip OcchioAperto-Windows.zip
+          cp *-portable.exe OcchioAperto-Windows-portable.exe
+          gh release delete windows --yes --cleanup-tag --repo "$GITHUB_REPOSITORY" || true
+          gh release create windows OcchioAperto-Windows.zip OcchioAperto-Windows-portable.exe \
+            --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --latest \
+            --title "Occhio Aperto per Windows" \
+            --notes "Versione Windows costruita automaticamente dal commit ${GITHUB_SHA::7}. Scarica lo zip, estrailo e avvia 'Occhio Aperto.exe'. Se Windows mostra SmartScreen: Ulteriori informazioni → Esegui comunque."
