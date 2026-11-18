@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#000000">
+<title>Occhio Aperto per Windows</title>
+<link rel="icon" href="../icon.svg" type="image/svg+xml">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+:root{--red:#ff2a4a;--ui:#e8e6e3;--mut:#8a8790;--card:#0e0e13;--line:#22222b}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,#1a0a10,#000 70%);color:var(--ui);font:400 15px/1.6 Inter,system-ui,sans-serif;display:flex;justify-content:center;padding:48px 16px}
+main{width:100%;max-width:640px}
+img.eye{width:110px;display:block}
+h1{font:400 clamp(38px,9vw,64px)/1 'Special Elite',serif;margin:14px 0 6px;color:#f2ece0}
+.sub{font:600 12px Inter;letter-spacing:.3em;color:var(--red);text-transform:uppercase;margin-bottom:28px}
+.btn{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 20px;border-radius:12px;text-decoration:none;color:#fff;border:1px solid var(--line);background:var(--card);margin:10px 0;transition:.2s}
+.btn:hover{border-color:var(--red)}
+.btn.main{background:linear-gradient(135deg,#8a0d1d,#ff2a4a);border-color:transparent}
+.btn b{font:600 16px Inter;display:block}.btn span{font-size:12.5px;color:#ddd;opacity:.8}
+.btn i{font-style:normal;font-size:22px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 20px;margin-top:22px}
+.box h2{font:800 11px Inter;letter-spacing:.25em;color:var(--mut);margin:0 0 8px;text-transform:uppercase}
+ol{margin:0;padding-left:20px}li{margin:4px 0}
+a{color:#c9a0ff}
+.foot{margin-top:28px;font-size:12.5px;color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+  <img class="eye" src="../icon.svg" alt="">
+  <h1>Occhio Aperto</h1>
+  <div class="sub">Versione per Windows</div>
+  <a class="btn main" href="/windows/download"><div><b>Scarica per Windows (.zip)</b><span>Consigliato · Windows 10 e 11, 64 bit</span></div><i>⬇</i></a>
+  <a class="btn" href="/windows/portable"><div><b>Versione portatile (.exe)</b><span>Un solo file, nessuna installazione · avvio più lento</span></div><i>⬇</i></a>
+  <div class="box">
+    <h2>Come si avvia</h2>
+    <ol>
+      <li>Estrai lo zip in una cartella.</li>
+      <li>Avvia <b>Occhio Aperto.exe</b>. Parte a schermo intero (F11 per la finestra).</li>
+      <li>Se Windows mostra «Windows ha protetto il PC»: <b>Ulteriori informazioni → Esegui comunque</b>. Succede perché il gioco non è firmato digitalmente.</li>
+    </ol>
+  </div>
+  <div class="box">
+    <h2>Da sapere</h2>
+    Funziona anche offline. Con internet, la chat della diretta si riempie con i nomi di chi ha giocato prima di te.
+  </div>
+  <div class="foot">Preferisci non scaricare nulla? <a href="/">Gioca nel browser</a>.</div>
+</main>
+</body>
+</html>

@@ -1,5 +1,5 @@
 /* Occhio Aperto — service worker: il gioco funziona anche offline. */
-const CACHE = 'occhio-aperto-v3';
+const CACHE = 'occhio-aperto-v4';
 const CORE = ['./', './index.html', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './?source=pwa',
   'https://unpkg.com/three@0.160.0/build/three.module.js'];
 
@@ -16,7 +16,9 @@ self.addEventListener('fetch', e => {
   if (url.hostname.includes('firebase') || url.pathname.includes('/firebasejs/')) return; // online soltanto
   // la pagina: prima la rete (per avere gli aggiornamenti), poi la copia salvata
   if (req.mode === 'navigate') {
-    e.respondWith(fetch(req).then(r => put('./index.html', r)).catch(() => caches.match('./index.html').then(r => r || caches.match('./'))));
+    // solo la pagina del gioco viene salvata come index.html; le altre pagine (es. /windows/) restano a sé
+    const game = url.pathname === new URL('./', self.registration.scope).pathname || url.pathname.endsWith('/index.html');
+    e.respondWith(fetch(req).then(r => put(game ? './index.html' : req, r)).catch(() => caches.match(game ? './index.html' : req).then(r => r || caches.match('./index.html'))));
     return;
   }
   // librerie e font: prima la copia salvata
