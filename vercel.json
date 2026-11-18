@@ -1,5 +1,6 @@
 {
   "redirects": [
+    { "source": "/itch/pacchetto", "destination": "https://github.com/AgonyLecter/occhioaperto/releases/latest/download/OcchioAperto-itch-pack.zip", "permanent": false },
     { "source": "/windows/download", "destination": "https://github.com/AgonyLecter/occhioaperto/releases/latest/download/OcchioAperto-Windows.zip", "permanent": false },
     { "source": "/windows/portable", "destination": "https://github.com/AgonyLecter/occhioaperto/releases/latest/download/OcchioAperto-Windows-portable.exe", "permanent": false },
     { "source": "/windows/OcchioAperto-Windows.zip", "destination": "https://github.com/AgonyLecter/occhioaperto/releases/latest/download/OcchioAperto-Windows.zip", "permanent": false },
