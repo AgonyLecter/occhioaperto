@@ -1280,6 +1280,7 @@ function toast(title, msg, icon = '💬') { const t = $('#toast'); t.querySelect
 
 /* ---------- dialoghi a scelta ---------- */
 function dialog(who, text, choices, color) {
+  if (phoneOpen()) { closePhone(); if (mode === 'explore') mode = 'dialog'; }
   return new Promise(res => {
     const d = $('#dialog'); d.classList.remove('hidden');
     d.querySelector('.who').textContent = who || ''; d.querySelector('.who').style.color = color || '#c9a0ff';
@@ -1296,7 +1297,7 @@ function dialog(who, text, choices, color) {
 async function talk(who, lines, color) { for (const l of lines) await dialog(who, l, ['…'], color); }
 
 /* ---------- foglio / nota ---------- */
-function showNote(text) { return new Promise(res => { const n = $('#note'); n.classList.remove('hidden'); n.querySelector('.paper').textContent = text; const prev = mode; mode = 'note'; unlockPointer(); n.querySelector('button').onclick = () => { n.classList.add('hidden'); mode = prev === 'note' ? 'explore' : prev; SFX.click(); if (mode === 'explore') lockPointer(); res(); }; }); }
+function showNote(text) { closePhone(); return new Promise(res => { const n = $('#note'); n.classList.remove('hidden'); n.querySelector('.paper').textContent = text; const prev = mode; mode = 'note'; unlockPointer(); n.querySelector('button').onclick = () => { n.classList.add('hidden'); mode = prev === 'note' ? 'explore' : prev; SFX.click(); if (mode === 'explore') lockPointer(); res(); }; }); }
 
 /* =========================================================
    TELEFONO
@@ -1339,7 +1340,11 @@ function renderPhone() {
   }
 }
 function openPhone() { if (mode !== 'explore') return; mode = 'phone'; unlockPointer(); S.phoneOpens++; PHONE.cur = null; $('#phone').classList.remove('hidden'); renderPhone(); SFX.click(); }
-function closePhone() { if (mode !== 'phone') return; $('#phone').classList.add('hidden'); mode = 'explore'; }
+const phoneOpen = () => !$('#phone').classList.contains('hidden');
+// chiude il telefono in qualsiasi momento (anche se nel frattempo è partita una scena della storia)
+function closePhone() { if (!phoneOpen()) return; $('#phone').classList.add('hidden'); PHONE.view = null; if (mode === 'phone') mode = 'explore'; }
+// le scene della storia chiudono prima il telefono, così non resta bloccato aperto
+function storyMode(m) { closePhone(); mode = m; }
 function setTorch(on) { W.torch.intensity = on ? 16 : 0; $('#phTorch').classList.toggle('on', on); $('#mTorch').classList.toggle('on', on); try { on && navigator.vibrate && navigator.vibrate(15); } catch (e) { } SFX.click(); if (on) { S.torchUses++; if (S.torchUses === 1) flavor(L('Una torcia. In una casa con la corrente elettrica. Prudente.', "A flashlight. In a house with electricity. Cautious.")); } }
 $('#phClose').onclick = closePhone; $('#phTorch').onclick = () => setTorch(W.torch.intensity === 0);
 
@@ -1702,14 +1707,14 @@ async function frontDoorUse() {
   }
 }
 async function visitorFlow() {
-  const v = VIS.current; if (!v || VIS.handling) return; VIS.handling = true; mode = 'dialog'; unlockPointer(); progress();
+  const v = VIS.current; if (!v || VIS.handling) return; VIS.handling = true; storyMode('dialog'); unlockPointer(); progress();
   const kind = v.kind; const who = kind === 'ferri' ? 'SIG.RA FERRI' : kind === 'sara' ? 'SARA' : L('DAVIDE — INTERNO 6', "DAVIDE — FLAT 6"); const col_ = kind === 'ferri' ? '#c9a0ff' : kind === 'sara' ? '#ffd34d' : '#ffb86b';
   let c = await dialog('', kind === 'ferri' ? L('Tre colpi leggeri. Qualcuno aspetta dall\'altra parte.', "Three light knocks. Someone is waiting on the other side.") : kind === 'sara' ? L('Due colpi, poi un terzo, più piano. Come chi ha paura della risposta.', "Two knocks, then a third, softer. Like someone afraid of the answer.") : L('Colpi pesanti. Impazienti. Dall\'altra parte, una luce azzurrina: lo schermo di un telefono.', "Heavy knocks. Impatient. On the other side, a bluish light: a phone screen."), [L('Guarda dallo spioncino', "Look through the peephole"), L('Apri la porta', "Open the door"), L('Non aprire', "Don't open")]);
   if (c === 0) {
-    F['peeped_' + kind] = true; mode = 'peep'; $('#peep').classList.remove('hidden'); $('#hud').classList.add('hidden'); SFX.creak();
+    F['peeped_' + kind] = true; storyMode('peep'); $('#peep').classList.remove('hidden'); $('#hud').classList.add('hidden'); SFX.creak();
     await wait(400);
     c = await dialog('', kind === 'ferri' ? L('La signora Ferri, la padrona di casa. Cardigan viola, capelli raccolti. Sta guardando dritto nello spioncino. Come se sapesse.', "Mrs. Ferri, the landlady. Purple cardigan, hair tied up. She's looking straight into the peephole. As if she knew.") : kind === 'sara' ? L('Una ragazza, impermeabile giallo fradicio. Gli occhi di chi non dorme da un anno. Stringe il telefono come un\'arma. Per un attimo sembra guardare te. Poi guarda le tue scarpe.', "A young woman, soaked yellow raincoat. The eyes of someone who hasn't slept in a year. She's holding her phone like a weapon. For a moment she seems to look at you. Then she looks at your shoes.") : L('Davide, il vicino dell\'interno 6. Cappuccio alzato, telefono in mano. Sullo schermo, una diretta. La tua.', "Davide, the neighbour from flat 6. Hood up, phone in hand. On the screen, a stream. Yours."), [L('Apri la porta', "Open the door"), L('Non aprire', "Don't open")]);
-    c = c + 1; $('#peep').classList.add('hidden'); $('#hud').classList.remove('hidden'); mode = 'dialog';
+    c = c + 1; $('#peep').classList.add('hidden'); $('#hud').classList.remove('hidden'); storyMode('dialog');
   }
   if (c === 1) {
     F['opened_' + kind] = true; W.doorTarget = 1.2; SFX.creak(); await wait(900);
@@ -1762,7 +1767,7 @@ async function boxUse() {
 async function bedUse() {
   if (CH >= 2) { flavor(pick([L('Il letto aveva ancora la forma del tuo corpo. Di lato, sul fianco sinistro. Come diceva lui.', "The bed still had the shape of your body. On its side, the left side. Just like he said."), L('Non avevi sonno. Avevi dormito, dicono. Il letto non sembrava d\'accordo.', "You weren't sleepy. You slept, they say. The bed didn't seem to agree.")])); return; }
   if (F.liveStarted) { flavor(STREAM.phase >= 3 ? L('Non c\'è tempo per dormire. Non c\'è più tempo per niente.', "There's no time to sleep. There's no time for anything anymore.") : L('Non adesso. La chat ti aspetta. Lui ti aspetta.', "Not now. The chat is waiting for you. He's waiting for you.")); return; }
-  mode = 'dialog'; unlockPointer();
+  storyMode('dialog'); unlockPointer();
   const c = await dialog('', L('Il letto era sfatto e invitante. La diretta poteva aspettare. Forse.', "The bed was unmade and inviting. The stream could wait. Maybe."), [L('Dormi. Niente diretta stanotte.', "Sleep. No stream tonight."), L('Non ancora.', "Not yet.")]);
   mode = 'explore'; if (c === 1) { lockPointer(); flavor(L('Saggia decisione. Il narratore aveva già scritto tutto il resto.', "Wise choice. The narrator had already written everything else.")); return; }
   sleepEnding();
@@ -2103,7 +2108,7 @@ async function wallUse() {
 /* ---------- la signora Ferri entra con la sua chiave ---------- */
 async function ferriInTalk() {
   if (F.c2ferriTalking || F.c2ferriDone) return;
-  F.c2ferriTalking = true; mode = 'dialog'; unlockPointer(); progress();
+  F.c2ferriTalking = true; storyMode('dialog'); unlockPointer(); progress();
   const who = 'SIG.RA FERRI', col = '#c9a0ff';
   await talk(who, [L('Scusa caro, ho bussato ma non rispondevi. Ho pensato… sai, dopo ieri sera.', "Sorry dear, I knocked but you didn't answer. I thought… you know, after last night."), L('Ho visto salire quella ragazza. Ti ha detto che è la sorella di Leo, vero?', "I saw that girl come up. She told you she's Leo's sister, didn't she?")], col);
   await talk(who, [L('Leo non aveva sorelle. Era figlio unico. Come te.', "Leo didn't have sisters. He was an only child. Like you.")], col);
@@ -2123,7 +2128,7 @@ async function ferriInTalk() {
     else await talk(who, [L('Come vuoi. Ma ricordati: le cose di Leo tornano sempre a casa. Prima o poi.', "As you wish. But remember: Leo's things always come back home. Sooner or later.")], col);
   }
   await talk(who, [L('Ora vado. Chiudo io, ho la chiave.', "I'll go now. I'll lock up, I have the key."), L(`Ah, ${NAME()}… asciugati le scarpe, quando rientri. Lasci sempre le pozze sulle scale.`, `Oh, ${NAME()}… dry your shoes when you come back in. You always leave puddles on the stairs.`)], col);
-  mode = 'cut'; walkNpcOut();
+  storyMode('cut'); walkNpcOut();
 }
 function walkNpcOut() {
   const m = W.npc; if (!m) return finishFerri(); const from = m.position.clone(), t0 = performance.now(); m.rotation.y = -Math.PI / 2; W.doorTarget = 1.2; SFX.creak();
@@ -2250,12 +2255,12 @@ async function chapter2(T) {
   await O(L('vai alla finestra. salutami.', "go to the window. wave at me."), 3000);
   F.lockSeat = false; F.c2toWindow = true; setObjective(L('Vai alla finestra della camera', "Go to the bedroom window"));
   await T.until('c2atWindow');
-  mode = 'cut'; unlockPointer();
+  storyMode('cut'); unlockPointer();
   await T.say(L('Nel palazzo di fronte, la terza finestra da destra si accese.', "In the building across, the third window from the right lit up."));
   await T.say(L('Dentro, qualcuno. Col telefono in mano. La luce dello schermo sulla faccia. La faccia, però, non si vedeva.', "Inside, someone. Phone in hand. The light of the screen on their face. The face, though, couldn't be seen."));
-  mode = 'dialog';
+  storyMode('dialog');
   const w = await dialog('', L('La figura alzò la mano. Lentamente. Aspettava.', "The figure raised a hand. Slowly. Waiting."), [L('Alza la mano', "Raise your hand"), L('Resta immobile', "Stay still")]);
-  mode = 'cut'; F.c2wave = w === 0;
+  storyMode('cut'); F.c2wave = w === 0;
   await T.say(w === 0 ? L('Alzasti la mano. Nello stesso istante, lei la abbassò. Esattamente nello stesso istante.', "You raised your hand. At the same instant, they lowered theirs. Exactly the same instant.") : L('Restasti immobile. La figura abbassò la mano. Come chi ha perso la pazienza. O la speranza.', "You stayed still. The figure lowered its hand. Like someone who lost patience. Or hope."));
   phoneReceive('Sconosciuto', '', false, imgNowFront());
   await T.say(L(`Il telefono vibrò. Una foto. ${n}, alla finestra. Scattata adesso. Da là.`, `The phone vibrated. A photo. ${n}, at the window. Taken now. From over there.`));
@@ -2275,10 +2280,10 @@ async function chapter2(T) {
   await T.wait(3600); phoneReceive('Sara', L('Sul frigo c\'è una foto. Sei tu. Sotto la pioggia, davanti al portone. C\'è la data. È di un anno fa.', "There's a photo on the fridge. It's you. In the rain, in front of the main door. There's a date. It's from a year ago."));
   await T.wait(3600); phoneReceive('Sara', L('Tu un anno fa non abitavi qui. Vero?', "You didn't live here a year ago. Right?"));
   await T.wait(1500);
-  mode = 'dialog';
+  storyMode('dialog');
   const rr = await dialog('SARA', L('Tu un anno fa non abitavi qui. Vero?', "You didn't live here a year ago. Right?"), [L('Non ero io', "It wasn't me"), L('Non me lo ricordo', "I don't remember"), L('(non rispondere)', "(don't answer)")], '#ffd34d');
   if (rr === 0) phoneSend('Sara', L('non ero io', "it wasn't me")); else if (rr === 1) phoneSend('Sara', L('non me lo ricordo', "i don't remember"));
-  mode = 'cut';
+  storyMode('cut');
   await T.say([L('Il narratore vorrebbe crederti. Ci sta provando con tutte le sue forze.', "The narrator would like to believe you. It's trying with all its might."), L('Il narratore, per una volta, ti crede. È proprio questo che lo spaventa.', "The narrator, for once, believes you. That's exactly what scares it."), L('Il silenzio. La risposta preferita di chi guarda.', "Silence. The favourite answer of those who watch.")][rr]);
   await T.wait(800); fadeOut(); await T.wait(1800);
   save.c2 = { usbTo: F.usbTo || 'keep', alibi: F.c2alibi || null, suspect: F.c2suspect || null, reply: rr }; persist();
@@ -2453,7 +2458,7 @@ async function chapter3(T) {
   T.later(9500, () => { phoneReceive('Sara', L('Sono sul pianerottolo. Apri.', "I'm on the landing. Open up.")); F.c3doorOk = true; spawnNpc('sara', -0.75, 5.9, Math.PI / 2, L('Parla con Sara', "Talk to Sara"), () => { F.c3saraTalk = true; }); SFX.knock(.6, 2); setObjective(L('Esci sul pianerottolo: Sara ti aspetta', "Go out to the landing: Sara is waiting")); });
   T.later(14000, () => phoneReceive('Mamma', L('Amore stasera non ti sento. Mi rispondi? Anche solo un pollice. 👍', "Sweetie I haven't heard from you tonight. Can you reply? Even just a thumbs up. 👍")));
   await T.until('c3saraTalk');
-  mode = 'dialog'; unlockPointer(); const S_ = 'SARA', sc = '#ffd34d';
+  storyMode('dialog'); unlockPointer(); const S_ = 'SARA', sc = '#ffd34d';
   await talk(S_, [L('Grazie. Sei pallido. Più di ieri.', "Thanks. You look pale. Paler than yesterday.")], sc);
   if (c2.usbTo === 'sara') await talk(S_, [L('Ho letto la lista di Leo. Tutta. In fondo c\'è un nome che non dovrebbe esserci: "Ospite". Leo chiamava così quello che lo guardava senza farsi vedere.', "I read Leo's list. All of it. At the bottom there's a name that shouldn't be there: \"Guest\". That's what Leo called the one who watched him without being seen.")], sc);
   else if (c2.usbTo === 'ferri') await talk(S_, [L('Hai dato la chiavetta alla Ferri. Lo so, me l\'ha detto lei. Sorridendo. Non so cosa ci farà. Non lo so più per nessuno, qui dentro.', "You gave the USB stick to Ferri. I know, she told me. Smiling. I don't know what she'll do with it. I don't know anything about anyone in here anymore.")], sc);
@@ -2496,7 +2501,7 @@ async function chapter3(T) {
   await T.say(L('Sul lavandino, il telefono di Davide si illuminò. Chiamata in arrivo. Il numero era il tuo.', "On the sink, Davide's phone lit up. Incoming call. The number was yours."));
   setObjective(L('Rispondi al telefono di Davide', "Answer Davide's phone"));
   await T.until('c3callStart'); clearInterval(ring);
-  mode = 'dialog'; unlockPointer(); const D_ = L('DAVIDE — MESSAGGIO VOCALE', "DAVIDE — VOICEMAIL"), dc = '#ffb86b';
+  storyMode('dialog'); unlockPointer(); const D_ = L('DAVIDE — MESSAGGIO VOCALE', "DAVIDE — VOICEMAIL"), dc = '#ffb86b';
   await talk(D_, [L('…ciao, vicino. Se senti questo, sei entrato. Lo sapevo. Entri sempre.', "…hi, neighbour. If you're hearing this, you came in. I knew it. You always come in."), L('Un anno fa ti ho visto sulle scale. Bagnato. Con le chiavi del sette in mano. Ti ho salutato, e tu mi hai chiamato per nome.', "A year ago I saw you on the stairs. Wet. Holding the keys to number seven. I said hello, and you called me by name."), L('Io il mio nome non te l\'avevo mai detto.', "I had never told you my name."), L('Da allora ti guardo. Non per farti del male. Per ricordarmi com\'eri. Perché tu non te lo ricordi.', "Since then I've been watching you. Not to hurt you. To remember what you were like. Because you don't remember."), L('Non sono io quello che guarda te. Sei tu che guardi tutti noi. Da quella finestra di fronte. Da un anno.', "I'm not the one watching you. You're the one watching all of us. From that window across the street. For a year.")], dc);
   await talk('', [L('Il messaggio finiva con un fruscio. Poi una voce, vicinissima al microfono. Somigliava alla tua.', "The message ended with static. Then a voice, very close to the microphone. It sounded like yours."), '«Cancellalo.»'], '#ff2a4a');
   const del = await dialog('', L('Il telefono chiedeva: eliminare il messaggio?', "The phone asked: delete the message?"), [L('Cancella', "Delete"), L('Conservalo', "Keep it")]);
@@ -2507,7 +2512,7 @@ async function chapter3(T) {
   spawnNpc('sara', -1.6, 7.2, 0, 'Sara', () => { });
   await T.wait(1200); SFX.step();
   await T.say(L('Quando uscisti dal bagno, Sara era dentro l\'appartamento. In mano, la foto del frigo.', "When you came out of the bathroom, Sara was inside the flat. In her hand, the photo from the fridge."));
-  mode = 'dialog'; unlockPointer();
+  storyMode('dialog'); unlockPointer();
   await talk(S_, [L('Te l\'avevo detto, ieri. Questa.', "I told you yesterday. This one."), L('Il portone. La pioggia. Uno col cappuccio e il telefono alzato verso la finestra di Leo. Guarda la data.', "The front door. The rain. Someone with a hood and a phone raised towards Leo's window. Look at the date.")], sc);
   const ans = await dialog(S_, L('Sei tu?', "Is it you?"), [L('Non sono io', "It's not me"), L('Non me lo ricordo', "I don't remember"), L('Fammi guardare meglio', "Let me look closer")], sc);
   F.c3answer = ['deny', 'forget', 'look'][ans];
@@ -2522,7 +2527,7 @@ async function chapter3(T) {
   await T.wait(1500);
   const sara = W.npc; removeNpc(); const sm = makePerson({ top: 0xc99a1a, bottom: 0x1d2433, hair: 0x2b1a12, long: true, h: 0.96, skin: 0xe2b48f, phone: true }); sm.position.set(-1.0, 0, 7.4); sm.rotation.y = -0.6; scene.add(sm); W.c3sara = sm;
   spawnNpc('ferri', -1.6, 6.0, 0, 'Sig.ra Ferri', () => { });
-  mode = 'dialog'; unlockPointer(); const F_ = 'SIG.RA FERRI', fc = '#c9a0ff';
+  storyMode('dialog'); unlockPointer(); const F_ = 'SIG.RA FERRI', fc = '#c9a0ff';
   await talk(F_, [L('Ragazzi. Uscite da lì. Quella casa non è vostra.', "You two. Get out of there. That house isn't yours."), L('Signorina, lei non si chiama Sara. Ho visto il suo documento quando è salita la prima volta. Nel cognome non c\'è nessuna R.', "Miss, your name isn't Sara. I saw your ID when you first came up. There's no R in your surname.")], fc);
   await talk(S_, [L('E lei come fa a vedere i documenti della gente?', "And how do you get to see people's IDs?")], sc);
   await talk(F_, [L('Ho le chiavi di tutto, cara. Anche dei cassetti.', "I have the keys to everything, dear. Drawers included.")], fc);
@@ -2593,7 +2598,7 @@ async function checkSupporterCode(raw) {
 }
 const unlockedCh = () => Math.max(save.chapter || 1, save.endings.includes('live') ? 2 : 1, save.endings.some(k => k.startsWith('c2_')) ? 3 : 1);
 async function sleepEnding() {
-  const T = RUN; F.ending = true; mode = 'cut'; fadeOut();
+  const T = RUN; F.ending = true; storyMode('cut'); fadeOut();
   await T.wait(1600); clearSubs();
   await T.say(L(`E così ${NAME()} andò a dormire. Nessuna diretta. Nessuna chat. Nessuno a guardare.`, `And so ${NAME()} went to sleep. No stream. No chat. Nobody watching.`));
   await T.wait(800); await T.say(L('Quasi nessuno.', "Almost nobody."));
@@ -2602,7 +2607,7 @@ async function sleepEnding() {
   await T.wait(4500); endChapter('sleep');
 }
 async function stairsEnding() {
-  const T = RUN; F.ending = true; mode = 'cut'; fadeOut();
+  const T = RUN; F.ending = true; storyMode('cut'); fadeOut();
   await T.wait(1500); clearSubs();
   await T.say(L('Le scale scendevano.', "The stairs went down.")); await T.say(L('E scendevano ancora.', "And down again."));
   await T.say(L('Al piano di sotto c\'era una porta. Interno 7.', "On the floor below there was a door. Flat 7.")); await T.say(L('Al piano di sotto ancora, un\'altra. Interno 7.', "On the floor below that, another. Flat 7."));
@@ -2653,6 +2658,7 @@ addEventListener('keydown', e => {
     KEYS[k] = true;
     if (k === 'e') tryInteract(); else if (k === 'f') setTorch(W.torch.intensity === 0); else if (k === 'tab' || k === 'q') { e.preventDefault(); openPhone(); }
   } else if (mode === 'phone') { if (k === 'tab' || k === 'q' || k === 'escape') { e.preventDefault(); closePhone(); lockPointer(); } }
+  else if (phoneOpen() && (k === 'tab' || k === 'q')) { e.preventDefault(); closePhone(); }
   else if (mode === 'os') {
     if (OS.lockKey && $('#lock') && !$('#lock').classList.contains('login')) OS.lockKey();
     if (k === 'escape') closePC();
@@ -2672,7 +2678,7 @@ $('#look').addEventListener('touchstart', e => { e.preventDefault(); const t = e
 addEventListener('touchmove', e => { for (const t of e.changedTouches) { if (t.identifier === JOY.id) moveJoy(t); else if (t.identifier === LOOK.id && mode === 'explore') { const dx = t.clientX - LOOK.x, dy = t.clientY - LOOK.y; LOOK.moved += Math.abs(dx) + Math.abs(dy); P.yaw -= dx * 0.0055 * save.sens; P.pitch = clamp(P.pitch - dy * 0.0055 * save.sens, -1.35, 1.35); LOOK.x = t.clientX; LOOK.y = t.clientY; } } }, { passive: false });
 addEventListener('touchend', e => { for (const t of e.changedTouches) { if (t.identifier === JOY.id) { JOY.id = null; JOY.x = JOY.y = 0; knob.style.transform = ''; } if (t.identifier === LOOK.id) { if (LOOK.moved < 8 && performance.now() - LOOK.t0 < 250 && mode === 'explore') tryInteract(); LOOK.id = null; } } });
 $('#mUse').addEventListener('touchstart', e => { e.preventDefault(); tryInteract(); }, { passive: false });
-$('#mPhone').addEventListener('touchstart', e => { e.preventDefault(); if (mode === 'phone') closePhone(); else openPhone(); }, { passive: false });
+$('#mPhone').addEventListener('touchstart', e => { e.preventDefault(); if (phoneOpen()) closePhone(); else openPhone(); }, { passive: false });
 $('#mTorch').addEventListener('touchstart', e => { e.preventDefault(); if (mode === 'explore') setTorch(W.torch.intensity === 0); }, { passive: false });
 $('#mPause').addEventListener('touchstart', e => { e.preventDefault(); if (mode === 'explore') openPause(); }, { passive: false });
 
