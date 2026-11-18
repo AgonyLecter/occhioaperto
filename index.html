@@ -449,6 +449,7 @@ body.mobile:not(.portrait) .lc .chat form input{padding:6px 8px;font-size:12px}
 <div id="options" class="panel hidden"><div class="in">
   <h2>Opzioni</h2>
   <label>VOLUME</label><input type="range" id="oVol" min="0" max="1" step="0.05">
+  <label>PIOGGIA</label><input type="range" id="oRain" min="0" max="1" step="0.05">
   <label>SENSIBILITÀ VISUALE</label><input type="range" id="oSens" min="0.3" max="2.5" step="0.1">
   <label>QUALITÀ GRAFICA (ricarica)</label><div class="row"><button data-q="low">Bassa</button><button data-q="high">Alta</button></div>
   <label>LINGUA</label><div class="row"><button data-lang="it">Italiano</button><button data-lang="en">English</button></div>
@@ -547,7 +548,7 @@ const pName = n => LANG === 'en' && PHONE_NAMES[n] ? PHONE_NAMES[n] : n;
   T('#nameScreen h2', 'What\'s your name?'); T('#nameScreen p', 'Your name will be used in the story. And someone else, sooner or later, will read it in their chat.'); T('#nameIn', 'your name', 'placeholder'); T('#nameOk', 'ENTER');
   T('#skip', 'SKIP ›'); T('#pause h2', 'Paused'); T('#pRes', 'RESUME'); T('#pOpt', 'OPTIONS'); T('#pMenu', 'MAIN MENU');
   T('#options h2', 'Options');
-  const lab = document.querySelectorAll('#options label'); const lt = ['VOLUME', 'LOOK SENSITIVITY', 'GRAPHICS QUALITY (reloads)', 'LANGUAGE', 'CONTROLS']; lab.forEach((l, k) => { if (lt[k]) l.textContent = lt[k]; });
+  const lab = document.querySelectorAll('#options label'); const lt = ['VOLUME', 'RAIN', 'LOOK SENSITIVITY', 'GRAPHICS QUALITY (reloads)', 'LANGUAGE', 'CONTROLS']; lab.forEach((l, k) => { if (lt[k]) l.textContent = lt[k]; });
   T('#options [data-q="low"]', 'Low'); T('#options [data-q="high"]', 'High');
   T('#oHelp', 'PC: <b>WASD</b> move · <b>Mouse</b> look · <b>E / click</b> interact · <b>Shift</b> run · <b>F</b> flashlight · <b>Tab</b> phone · <b>Esc</b> pause · <b>F11</b> full screen<br>Mobile: joystick on the left, drag on the right to look, <b>USE</b> to interact.');
   T('#oClose', 'CLOSE'); T('[data-close]', 'CLOSE'); T('#chapPanel h2', 'Chapters'); T('#endsPanel h2', 'Endings');
@@ -666,9 +667,13 @@ function initAudio() {
   for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1; AU.noise = buf;
   // pioggia
   const rn = ctx.createBufferSource(); rn.buffer = buf; rn.loop = true;
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2200;
-  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 400;
-  AU.rain = ctx.createGain(); AU.rain.gain.value = 0.07; rn.connect(lp).connect(hp).connect(AU.rain).connect(AU.master); rn.start();
+  // pioggia attutita, come sentita da dentro casa (prima era rumore bianco pieno e copriva tutto)
+  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1100; lp.Q.value = 0.4;
+  const lp2 = ctx.createBiquadFilter(); lp2.type = 'lowpass'; lp2.frequency.value = 1800;
+  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 220;
+  AU.rain = ctx.createGain(); AU.rain.gain.value = 0.022 * (save.rain ?? 0.6) / 0.6;
+  const rl = ctx.createOscillator(); rl.frequency.value = 0.11; const rg = ctx.createGain(); rg.gain.value = 0.004; rl.connect(rg).connect(AU.rain.gain); rl.start();
+  rn.connect(lp).connect(lp2).connect(hp).connect(AU.rain).connect(AU.master); rn.start();
   // drone
   AU.drone = ctx.createGain(); AU.drone.gain.value = 0.0;
   const df = ctx.createBiquadFilter(); df.type = 'lowpass'; df.frequency.value = 180; df.Q.value = 4;
@@ -682,6 +687,7 @@ function initAudio() {
 }
 function setDrone(v, t = 3) { if (!AU.ctx) return; AU.drone.gain.cancelScheduledValues(AU.ctx.currentTime); AU.drone.gain.linearRampToValueAtTime(v, AU.ctx.currentTime + t); }
 function setVol(v) { save.vol = v; persist(); if (AU.master) AU.master.gain.value = v; }
+function setRain(v) { save.rain = v; persist(); if (AU.rain) AU.rain.gain.value = 0.022 * v / 0.6; }
 function env(g, t, a, d, p) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(Math.max(p, 0.0002), t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); }
 function osc(type, f, t, dur, p, o = {}) { const c = AU.ctx; const s = c.createOscillator(); s.type = type; s.frequency.setValueAtTime(f, t); if (o.slide) s.frequency.exponentialRampToValueAtTime(o.slide, t + dur); const g = c.createGain(); env(g, t, o.a || 0.005, dur, p); s.connect(g).connect(o.dest || AU.sfx); s.start(t); s.stop(t + dur + (o.a || 0) + 0.1); }
 function nz(t, dur, p, o = {}) { const c = AU.ctx; const s = c.createBufferSource(); s.buffer = AU.noise; const f = c.createBiquadFilter(); f.type = o.type || 'lowpass'; f.frequency.value = o.f || 1000; f.Q.value = o.q || 1; const g = c.createGain(); env(g, t, o.a || 0.005, dur, p); s.connect(f).connect(g).connect(o.dest || AU.sfx); s.start(t, Math.random()); s.stop(t + (o.a || 0) + dur + 0.1); }
@@ -716,7 +722,7 @@ const canvas = $('#c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: HIGH, powerPreference: 'high-performance' });
 renderer.setPixelRatio(Math.min(devicePixelRatio, HIGH ? 2 : 1.25));
 renderer.setSize(innerWidth, innerHeight);
-renderer.shadowMap.enabled = SHADOWS; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.shadowMap.enabled = SHADOWS; renderer.shadowMap.type = THREE.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false; renderer.shadowMap.needsUpdate = true;
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.15;
 const scene = new THREE.Scene(); scene.background = new THREE.Color(0x010103); scene.fog = new THREE.FogExp2(0x030409, 0.055);
 const camera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.04, 80); camera.rotation.order = 'YXZ'; scene.add(camera);
@@ -794,9 +800,10 @@ const INSP_NAMES = { poster: L('poster di Abyss Run', "Abyss Run poster"), fridg
 function inspect(obj, key, label, lines, extra) {
   return I(obj, label, () => {
     if (CH === 2 && CH2HOOK[key] && CH2HOOK[key]()) return;
+    if (storyBusy() || (SUB.cur && SUB.cur.flavor && SUB.cur.key === key)) return;
     const alt = (CH === 2 && CH2L[key]) || (CH === 3 && CH3L[key]); const LN = alt || lines; const sk = alt ? key + '#' + CH : key;
     const n = (S.insp[sk] = (S.insp[sk] || 0) + 1); S.lastInsp = key; if (CH === 2) F.c2insp = (F.c2insp || 0) + 1;
-    const l = LN[Math.min(n - 1, LN.length - 1)]; say(typeof l === 'function' ? l() : l); if (!alt) extra && extra(n);
+    const l = LN[Math.min(n - 1, LN.length - 1)]; flavor(typeof l === 'function' ? l() : l, { key }); if (!alt) extra && extra(n);
   });
 }
 /* righe alternative del capitolo 2: la casa è la stessa, tu forse no */
@@ -926,8 +933,8 @@ function buildWorld() {
   I(W.webcam, () => F.tapeOn ? L('Togli il nastro dalla webcam', "Remove the tape from the webcam") : 'Webcam', () => {
     if (F.tapeOn) {
       F.tapeOn = false; W.tape.visible = false; SFX.click(); F.tapeRemoved = true; progress();
-      say(F.liveChecked ? L(`Il nastro era lì per un motivo. ${NAME()} lo tolse comunque.`, `The tape was there for a reason. ${NAME()} removed it anyway.`) : L(`${NAME()} tolse il nastro dalla webcam. Così, senza un motivo. Il narratore se lo appuntò.`, `${NAME()} removed the tape from the webcam. Just like that, for no reason. The narrator made a note of it.`));
-    } else say(pick([L('La lucina della webcam era spenta. Questo non significava niente.', "The webcam light was off. That meant nothing."), L('Un piccolo occhio di vetro. Guardava sempre nello stesso punto: te.', "A small glass eye. Always looking at the same spot: you.")]));
+      flavor(F.liveChecked ? L(`Il nastro era lì per un motivo. ${NAME()} lo tolse comunque.`, `The tape was there for a reason. ${NAME()} removed it anyway.`) : L(`${NAME()} tolse il nastro dalla webcam. Così, senza un motivo. Il narratore se lo appuntò.`, `${NAME()} removed the tape from the webcam. Just like that, for no reason. The narrator made a note of it.`));
+    } else flavor(pick([L('La lucina della webcam era spenta. Questo non significava niente.', "The webcam light was off. That meant nothing."), L('Un piccolo occhio di vetro. Guardava sempre nello stesso punto: te.', "A small glass eye. Always looking at the same spot: you.")]));
   });
   // microfono a braccio
   const arm = std(0x111111, .4, .7); CY(0.012, 0.012, 0.45, arm, 1.65, 1.0, 0.25).rotation.z = 0.5; const mic = CY(0.03, 0.03, 0.13, std(0x222225, .3, .5), 1.85, 1.2, 0.45); mic.rotation.x = 1.1;
@@ -951,7 +958,7 @@ function buildWorld() {
   const ring = new THREE.Group(); ring.position.set(0.95, 0, 0.7); scene.add(ring);
   CY(0.01, 0.01, 1.6, legM, 0, 0.8, 0, ring);
   W.ringMesh = mesh(new THREE.TorusGeometry(0.17, 0.025, 8, 32), std(0x222222, .3, 0, { emissive: 0xffffff, emissiveIntensity: 0 }), 0, 1.65, 0, ring); W.ringMesh.rotation.y = 0.6;
-  I(ring, () => W.L.ring.on ? L('Spegni la ring light', "Turn off the ring light") : L('Accendi la ring light', "Turn on the ring light"), () => { toggleLight('ring'); SFX.click(); if (!S.insp.ring) { S.insp.ring = 1; say(L('La ring light. Fa sembrare tutti più belli in diretta. E rende tutto il resto della stanza più buio.', "The ring light. It makes everyone look better on stream. And makes the rest of the room darker.")); } });
+  I(ring, () => W.L.ring.on ? L('Spegni la ring light', "Turn off the ring light") : L('Accendi la ring light', "Turn on the ring light"), () => { toggleLight('ring'); SFX.click(); if (!S.insp.ring) { S.insp.ring = 1; flavor(L('La ring light. Fa sembrare tutti più belli in diretta. E rende tutto il resto della stanza più buio.', "The ring light. It makes everyone look better on stream. And makes the rest of the room darker.")); } });
   col(0.8, 0.55, 1.1, 0.85);
   // poster
   const pA = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.9), std(0xffffff, .8, 0, { map: posterTex('abyss') })); pA.position.set(3.7, 1.7, 0.065); scene.add(pA);
@@ -1043,7 +1050,7 @@ function buildWorld() {
   inspect(icom, 'intercom', L('Citofono', "Intercom"), [L('Il citofono. Nessuno citofona mai. Bussano direttamente. Come se il portone fosse sempre aperto. O come se fossero già dentro.', "The intercom. Nobody ever buzzes. They knock directly. As if the main door were always open. Or as if they were already inside.")]);
   W.swBath = B(0.08, 0.12, 0.02, std(0xeeeeee, .4), 4.9, 1.3, 4.07); I(W.swBath, L('Luce bagno', "Bathroom light"), () => { toggleLight('bath'); SFX.click(); });
   W.swKitchen = B(0.08, 0.12, 0.02, std(0xeeeeee, .4), 7.35, 1.3, 4.07); I(W.swKitchen, L('Luce cucina', "Kitchen light"), () => { toggleLight('kitchen'); SFX.click(); });
-  W.swRoom = B(0.08, 0.12, 0.02, std(0xeeeeee, .4), 0.75, 1.3, 3.93); I(W.swRoom, L('Lampadario camera', "Bedroom ceiling light"), () => { SFX.click(); SFX.buzz(); say(pick([L('Il lampadario della camera era fulminato da tre settimane. Ti eri ripromesso di cambiarlo.', "The bedroom light had been burnt out for three weeks. You kept promising yourself you'd change it."), L('Click. Niente. La lampadina era ancora fulminata. Il buio, invece, funzionava benissimo.', "Click. Nothing. The bulb was still dead. The dark, on the other hand, worked perfectly.")])); });
+  W.swRoom = B(0.08, 0.12, 0.02, std(0xeeeeee, .4), 0.75, 1.3, 3.93); I(W.swRoom, L('Lampadario camera', "Bedroom ceiling light"), () => { SFX.click(); SFX.buzz(); flavor(pick([L('Il lampadario della camera era fulminato da tre settimane. Ti eri ripromesso di cambiarlo.', "The bedroom light had been burnt out for three weeks. You kept promising yourself you'd change it."), L('Click. Niente. La lampadina era ancora fulminata. Il buio, invece, funzionava benissimo.', "Click. Nothing. The bulb was still dead. The dark, on the other hand, worked perfectly.")])); });
 
   /* --- BAGNO --- */
   W.bathDoor = new THREE.Group(); W.bathDoor.position.set(5.1, 0, 4); scene.add(W.bathDoor);
@@ -1238,20 +1245,31 @@ let gameMinutes = 21 * 60 + 4;
 const gameClockStr = () => REAL.hm(); // l'ora del gioco è l'ora vera del giocatore
 
 /* ---------- sottotitoli ---------- */
-const SUB = { q: [], busy: false, iv: null };
+const SUB = { q: [], busy: false, iv: null, cur: null, cut: null };
 function say(text, o = {}) { return new Promise(res => { SUB.q.push({ text, ...o, res }); if (!SUB.busy) nextSub(); }); }
 async function nextSub() {
   const s = SUB.q.shift(); const el = $('#subs');
   if (!s) { SUB.busy = false; el.innerHTML = ''; el.className = ''; return; }
-  SUB.busy = true; el.className = s.glitch ? 'glitchy' : '';
+  SUB.busy = true; SUB.cur = s; el.className = s.glitch ? 'glitchy' : '';
   const who = s.who ? `<span class="who" style="color:${s.color || '#c9a0ff'}">${esc(s.who)}</span>` : '';
   let i = 0; clearInterval(SUB.iv);
   SUB.iv = setInterval(() => { i += 2; el.innerHTML = who + esc(s.text.slice(0, i)); if (i >= s.text.length) clearInterval(SUB.iv); }, 28);
   if (s.glitch) SFX.glitch();
-  await wait(s.dur || Math.max(2400, s.text.length * 58));
-  s.res(); nextSub();
+  await new Promise(r => { SUB.cut = r; setTimeout(r, s.dur || Math.max(2400, s.text.length * 58)); });
+  SUB.cut = null; SUB.cur = null; s.res(); nextSub();
 }
-function clearSubs() { SUB.q.forEach(s => s.res()); SUB.q = []; clearInterval(SUB.iv); $('#subs').innerHTML = ''; SUB.busy = false; }
+/* La storia ha la precedenza: mentre scorre una frase della storia, le frasi
+   d'interazione (oggetti, porte, muri…) vengono ignorate. Una nuova frase
+   d'interazione sostituisce quella precedente invece di mettersi in coda. */
+const storyBusy = () => (SUB.cur && !SUB.cur.flavor) || SUB.q.some(x => !x.flavor);
+function flavor(text, o = {}) {
+  if (!text || storyBusy()) return Promise.resolve();
+  if (SUB.cur && SUB.cur.flavor && SUB.cur.text === text) return Promise.resolve();
+  SUB.q = SUB.q.filter(x => { if (x.flavor) { x.res(); return false; } return true; });
+  if (SUB.cur && SUB.cur.flavor && SUB.cut) SUB.cut();
+  return say(text, Object.assign({}, o, { flavor: true }));
+}
+function clearSubs() { SUB.q.forEach(s => s.res()); SUB.q = []; if (SUB.cut) SUB.cut(); clearInterval(SUB.iv); $('#subs').innerHTML = ''; SUB.busy = false; }
 
 /* ---------- obiettivo ---------- */
 function setObjective(t) { const o = $('#objective'); o.style.opacity = t ? 1 : 0; o.querySelector('span').textContent = t; o.classList.remove('new'); void o.offsetWidth; o.classList.add('new'); F.obj = t; progress(); if (t) { SFX.osping(); if (OS.open) osNotify(L('OBIETTIVO', "OBJECTIVE"), t); } }
@@ -1322,7 +1340,7 @@ function renderPhone() {
 }
 function openPhone() { if (mode !== 'explore') return; mode = 'phone'; unlockPointer(); S.phoneOpens++; PHONE.cur = null; $('#phone').classList.remove('hidden'); renderPhone(); SFX.click(); }
 function closePhone() { if (mode !== 'phone') return; $('#phone').classList.add('hidden'); mode = 'explore'; }
-function setTorch(on) { W.torch.intensity = on ? 16 : 0; $('#phTorch').classList.toggle('on', on); $('#mTorch').classList.toggle('on', on); try { on && navigator.vibrate && navigator.vibrate(15); } catch (e) { } SFX.click(); if (on) { S.torchUses++; if (S.torchUses === 1) say(L('Una torcia. In una casa con la corrente elettrica. Prudente.', "A flashlight. In a house with electricity. Cautious.")); } }
+function setTorch(on) { W.torch.intensity = on ? 16 : 0; $('#phTorch').classList.toggle('on', on); $('#mTorch').classList.toggle('on', on); try { on && navigator.vibrate && navigator.vibrate(15); } catch (e) { } SFX.click(); if (on) { S.torchUses++; if (S.torchUses === 1) flavor(L('Una torcia. In una casa con la corrente elettrica. Prudente.', "A flashlight. In a house with electricity. Cautious.")); } }
 $('#phClose').onclick = closePhone; $('#phTorch').onclick = () => setTorch(W.torch.intensity === 0);
 
 /* =========================================================
@@ -1671,14 +1689,14 @@ function knockTick(dt) {
 async function frontDoorUse() {
   if (VIS.current) return visitorFlow();
   if (CH === 3) return frontDoor3();
-  if (CH === 2) { SFX.rattle(); say(pick([L('Chiusa a chiave. Le mandate erano due. Tu ne dai sempre una.', "Locked. Two turns of the key. You always do just one."), L('La porta non si apriva. Dallo spioncino, il pianerottolo vuoto e la lampadina che tremava.', "The door wouldn't open. Through the peephole, the empty landing and the flickering bulb."), L('La Ferri ha una copia. Davide, forse. Tu ne hai tre. Nessuna apriva.', "Mrs. Ferri has a copy. Davide, maybe. You have three. None of them opened it.")])); return; }
-  if (STREAM.phase >= 3) { SFX.rattle(); say(L('La chiave girava a vuoto. La porta non era più una porta.', "The key turned uselessly. The door wasn't a door anymore."), { glitch: true }); return; }
-  if (F.liveStarted) { SFX.rattle(); say(L('Non adesso. Sei in diretta. Ti stanno guardando.', "Not now. You're live. They're watching you.")); return; }
+  if (CH === 2) { SFX.rattle(); flavor(pick([L('Chiusa a chiave. Le mandate erano due. Tu ne dai sempre una.', "Locked. Two turns of the key. You always do just one."), L('La porta non si apriva. Dallo spioncino, il pianerottolo vuoto e la lampadina che tremava.', "The door wouldn't open. Through the peephole, the empty landing and the flickering bulb."), L('La Ferri ha una copia. Davide, forse. Tu ne hai tre. Nessuna apriva.', "Mrs. Ferri has a copy. Davide, maybe. You have three. None of them opened it.")])); return; }
+  if (STREAM.phase >= 3) { SFX.rattle(); flavor(L('La chiave girava a vuoto. La porta non era più una porta.', "The key turned uselessly. The door wasn't a door anymore."), { glitch: true }); return; }
+  if (F.liveStarted) { SFX.rattle(); flavor(L('Non adesso. Sei in diretta. Ti stanno guardando.', "Not now. You're live. They're watching you.")); return; }
   F.doorTries = (F.doorTries || 0) + 1; SFX.rattle();
   const lines = [L(`Chiusa a chiave. ${NAME()} la chiudeva sempre, da quando si era trasferito. Da quando aveva trovato la porta aperta la prima sera.`, `Locked. ${NAME()} always locked it, ever since moving in. Ever since finding it open on the first night.`), L('La chiave era nella toppa. Girava. La porta no.', "The key was in the lock. It turned. The door didn't."), L('Il narratore apprezzerebbe molto se tornassi alla storia. Il PC. Sulla scrivania.', "The narrator would really appreciate it if you went back to the story. The PC. On the desk."), L(`Insistere non è un tratto caratteriale interessante, ${NAME()}.`, `Insisting is not an interesting personality trait, ${NAME()}.`)];
-  if (F.doorTries <= lines.length) { say(lines[F.doorTries - 1]); return; }
+  if (F.doorTries <= lines.length) { flavor(lines[F.doorTries - 1]); return; }
   if (F.doorTries === 5) {
-    await say(L('…Va bene. Vuoi uscire? Esci pure. Nessuno ti trattiene.', "…Fine. You want out? Go ahead. Nobody's stopping you."));
+    await flavor(L('…Va bene. Vuoi uscire? Esci pure. Nessuno ti trattiene.', "…Fine. You want out? Go ahead. Nobody's stopping you."));
     W.doorTarget = 1.35; SFX.creak(); W.doorCol.on = false; W.thresholdCol.on = false; W.stairCol.on = false; F.stairsOpen = true;
     setObjective('…');
   }
@@ -1727,26 +1745,26 @@ function spawnEnvelope() {
    ARMADIO / SCATOLA / LETTO
 ========================================================= */
 function wardrobeUse() {
-  if (CH >= 2) { say(L('L\'armadio di Leo, aperto. Le grucce oscillavano piano. Qui dentro non c\'è corrente d\'aria.', "Leo's wardrobe, open. The hangers swayed gently. There's no draught in here.")); return; }
-  if (F.wardOpen) { say(L('Odore di polvere e di qualcos\'altro. Plastica bruciata. Elettronica vecchia.', "A smell of dust and something else. Burnt plastic. Old electronics.")); return; }
-  if (!F.wardUnlocked) { SFX.rattle(); say(pick([L('L\'armadio era chiuso a chiave. La chiave non l\'avevi mai trovata.', "The wardrobe was locked. You never found the key."), L('Chiuso. Da dentro, qualcosa rispose al rumore della maniglia. Un piccolo tonfo. Topi, sicuramente.', "Locked. From inside, something answered the sound of the handle. A small thud. Mice, surely.")])); return; }
+  if (CH >= 2) { flavor(L('L\'armadio di Leo, aperto. Le grucce oscillavano piano. Qui dentro non c\'è corrente d\'aria.', "Leo's wardrobe, open. The hangers swayed gently. There's no draught in here.")); return; }
+  if (F.wardOpen) { flavor(L('Odore di polvere e di qualcos\'altro. Plastica bruciata. Elettronica vecchia.', "A smell of dust and something else. Burnt plastic. Old electronics.")); return; }
+  if (!F.wardUnlocked) { SFX.rattle(); flavor(pick([L('L\'armadio era chiuso a chiave. La chiave non l\'avevi mai trovata.', "The wardrobe was locked. You never found the key."), L('Chiuso. Da dentro, qualcosa rispose al rumore della maniglia. Un piccolo tonfo. Topi, sicuramente.', "Locked. From inside, something answered the sound of the handle. A small thud. Mice, surely.")])); return; }
   F.wardOpen = true; W.wTarget = 1.6; SFX.creak(); progress();
-  say(L('Stavolta l\'anta si aprì da sola, con un clic. Come se aspettasse.', "This time the door opened by itself, with a click. As if it had been waiting."));
+  flavor(L('Stavolta l\'anta si aprì da sola, con un clic. Come se aspettasse.', "This time the door opened by itself, with a click. As if it had been waiting."));
   if (STREAM.live) setTimeout(() => chatPost(OCC, L('bravo. ora la scatola.', 'good. now the box.')), 2500);
 }
 async function boxUse() {
-  if (CH >= 2) { say(L('La scatola di Leo. Vuota. Il capello nero sul fondo non c\'era più.', "Leo's box. Empty. The black hair at the bottom was gone.")); return; }
-  if (!F.wardOpen) return; if (F.boxRead) { say(L('La scatola di Leo. Vuota, ormai. Tranne per un capello lungo e nero sul fondo.', "Leo's box. Empty, by now. Except for a long black hair at the bottom.")); return; }
+  if (CH >= 2) { flavor(L('La scatola di Leo. Vuota. Il capello nero sul fondo non c\'era più.', "Leo's box. Empty. The black hair at the bottom was gone.")); return; }
+  if (!F.wardOpen) return; if (F.boxRead) { flavor(L('La scatola di Leo. Vuota, ormai. Tranne per un capello lungo e nero sul fondo.', "Leo's box. Empty, by now. Except for a long black hair at the bottom.")); return; }
   SFX.click(); progress();
   await showNote(L(`Se stai leggendo questo, la Ferri ha dato il PC a te.\n\nNon è un PC. È una finestra. E le finestre si guardano da tutte e due le parti.\n\nREGOLE\n1. Non chiudere la live mentre lui è in chat.\n2. Se la chat scrive "dietro di te", NON girarti. Conta fino a dieci.\n3. Non dirgli il PIN. Lo sa già, ma non dirglielo.\n4. Lui non è nella stanza. È più lontano. È dall'altra parte dello schermo.\n   Quella dove sei tu, adesso.\n\nNella scatola c'è la chiavetta con la lista. Guarda chi c'era.\n\n— Leo, 16/11/2025`, `If you're reading this, Ferri gave the PC to you.\n\nIt's not a PC. It's a window. And windows can be looked through from both sides.\n\nRULES\n1. Don't end the stream while he's in chat.\n2. If the chat says "behind you", DON'T turn around. Count to ten.\n3. Don't tell him the PIN. He already knows it, but don't tell him.\n4. He's not in the room. He's further away. He's on the other side of the screen.\n   The side where you are, now.\n\nIn the box there's the USB stick with the list. See who was there.\n\n— Leo, 16/11/2025`));
   F.boxRead = true; F.usb = true; renderIcons(); SFX.unlock(); toast(L('Oggetto', "Item"), L('Hai preso la chiavetta USB "LEO"', "You took the USB stick \"LEO\""), '💾');
 }
 async function bedUse() {
-  if (CH >= 2) { say(pick([L('Il letto aveva ancora la forma del tuo corpo. Di lato, sul fianco sinistro. Come diceva lui.', "The bed still had the shape of your body. On its side, the left side. Just like he said."), L('Non avevi sonno. Avevi dormito, dicono. Il letto non sembrava d\'accordo.', "You weren't sleepy. You slept, they say. The bed didn't seem to agree.")])); return; }
-  if (F.liveStarted) { say(STREAM.phase >= 3 ? L('Non c\'è tempo per dormire. Non c\'è più tempo per niente.', "There's no time to sleep. There's no time for anything anymore.") : L('Non adesso. La chat ti aspetta. Lui ti aspetta.', "Not now. The chat is waiting for you. He's waiting for you.")); return; }
+  if (CH >= 2) { flavor(pick([L('Il letto aveva ancora la forma del tuo corpo. Di lato, sul fianco sinistro. Come diceva lui.', "The bed still had the shape of your body. On its side, the left side. Just like he said."), L('Non avevi sonno. Avevi dormito, dicono. Il letto non sembrava d\'accordo.', "You weren't sleepy. You slept, they say. The bed didn't seem to agree.")])); return; }
+  if (F.liveStarted) { flavor(STREAM.phase >= 3 ? L('Non c\'è tempo per dormire. Non c\'è più tempo per niente.', "There's no time to sleep. There's no time for anything anymore.") : L('Non adesso. La chat ti aspetta. Lui ti aspetta.', "Not now. The chat is waiting for you. He's waiting for you.")); return; }
   mode = 'dialog'; unlockPointer();
   const c = await dialog('', L('Il letto era sfatto e invitante. La diretta poteva aspettare. Forse.', "The bed was unmade and inviting. The stream could wait. Maybe."), [L('Dormi. Niente diretta stanotte.', "Sleep. No stream tonight."), L('Non ancora.', "Not yet.")]);
-  mode = 'explore'; if (c === 1) { lockPointer(); say(L('Saggia decisione. Il narratore aveva già scritto tutto il resto.', "Wise choice. The narrator had already written everything else.")); return; }
+  mode = 'explore'; if (c === 1) { lockPointer(); flavor(L('Saggia decisione. Il narratore aveva già scritto tutto il resto.', "Wise choice. The narrator had already written everything else.")); return; }
   sleepEnding();
 }
 
@@ -2065,7 +2083,8 @@ async function saraIgnored() {
 
 /* ---------- il muro dell'interno 6 ---------- */
 async function wallUse() {
-  if (!(CH === 2 && F.c2wallOn) || F.c2listening || F.c2listened) { say(pick([L('Un muro. Sottile. In questo palazzo tutti i muri sono sottili.', "A wall. Thin. In this building all the walls are thin."), L('Il muro era freddo. Dall\'altra parte, silenzio. Il silenzio di chi trattiene il fiato.', "The wall was cold. On the other side, silence. The silence of someone holding their breath.")])); return; }
+  if (F.c2listening && !F.c2listened) return;
+  if (!(CH === 2 && F.c2wallOn) || F.c2listened) { flavor(pick([L('Un muro. Sottile. In questo palazzo tutti i muri sono sottili.', "A wall. Thin. In this building all the walls are thin."), L('Il muro era freddo. Dall\'altra parte, silenzio. Il silenzio di chi trattiene il fiato.', "The wall was cold. On the other side, silence. The silence of someone holding their breath.")])); return; }
   F.c2listening = true; progress(); setDrone(0.08, 3);
   const D = (t, o) => say(t, Object.assign({ who: L('DAVIDE — OLTRE IL MURO', "DAVIDE — THROUGH THE WALL"), color: '#ffb86b' }, o)), Sa = t => say(t, { who: L('SARA — OLTRE IL MURO', "SARA — THROUGH THE WALL"), color: '#ffd34d' });
   await say(L('Appoggiasti l\'orecchio alla parete. Voci smorzate, come da sott\'acqua.', "You pressed your ear to the wall. Muffled voices, as if underwater."));
@@ -2384,7 +2403,7 @@ function davTick(dt) {
   const inside = P.z > 6.2;
   W.self.visible = inside && mode !== 'os';
   if (W.self.visible) { W.self.position.set(P.x, 0, P.z); W.self.rotation.y = P.yaw + Math.PI; }
-  if (inside || F.c3screens) { if (frame % 6 === 0) davCamRender(); if (frame % 3 === 0) drawDavScreens(); }
+  if (inside) { if (frame % 6 === 0) davCamRender(); if (frame % 3 === 0) drawDavScreens(); }
 }
 /* ---------- NPC generico ---------- */
 function spawnNpc(kind, x, z, rotY, label, fn) {
@@ -2396,18 +2415,18 @@ function spawnNpc(kind, x, z, rotY, label, fn) {
 }
 /* ---------- porta di casa, bagno, telefono ---------- */
 function frontDoor3() {
-  if (W.doorTarget > .5) { say(L('La porta di casa, aperta. Il pianerottolo odorava di pioggia e di polvere bagnata.', "The front door, open. The landing smelled of rain and wet dust.")); return; }
-  if (!F.c3doorOk) { SFX.rattle(); say(L('Chiusa. Non ancora. Il narratore preferisce che tu legga prima i messaggi.', "Locked. Not yet. The narrator would rather you read your messages first.")); return; }
+  if (W.doorTarget > .5) { flavor(L('La porta di casa, aperta. Il pianerottolo odorava di pioggia e di polvere bagnata.', "The front door, open. The landing smelled of rain and wet dust.")); return; }
+  if (!F.c3doorOk) { SFX.rattle(); flavor(L('Chiusa. Non ancora. Il narratore preferisce che tu legga prima i messaggi.', "Locked. Not yet. The narrator would rather you read your messages first.")); return; }
   W.doorTarget = 1.35; SFX.creak(); W.doorCol.on = false; W.thresholdCol.on = false;
 }
 function davBathUse() {
-  if (!F.c3bathOk) { SFX.rattle(); say(F.c3bathKnock ? L('La maniglia era fredda. Dall\'altra parte, qualcuno trattenne il respiro.', "The handle was cold. On the other side, someone held their breath.") : L('Il bagno di Davide. Chiuso. Una sottile riga di luce sotto la porta.', "Davide's bathroom. Closed. A thin line of light under the door.")); return; }
-  if (W.dbTarget > .5) { say(L('Il bagno era vuoto. Per quanto possa essere vuota una stanza in cui hai appena sentito bussare.', "The bathroom was empty. As empty as a room can be after you've just heard knocking from it.")); return; }
+  if (!F.c3bathOk) { SFX.rattle(); flavor(F.c3bathKnock ? L('La maniglia era fredda. Dall\'altra parte, qualcuno trattenne il respiro.', "The handle was cold. On the other side, someone held their breath.") : L('Il bagno di Davide. Chiuso. Una sottile riga di luce sotto la porta.', "Davide's bathroom. Closed. A thin line of light under the door.")); return; }
+  if (W.dbTarget > .5) { flavor(L('Il bagno era vuoto. Per quanto possa essere vuota una stanza in cui hai appena sentito bussare.', "The bathroom was empty. As empty as a room can be after you've just heard knocking from it.")); return; }
   W.dbTarget = 1.5; SFX.creak(); W.L.dbath.on = true; W.L.dbath.light.intensity = W.L.dbath.base; F.c3bathOpen = true; progress();
 }
 function davPhoneUse() {
   if (!F.c3bathOpen) return;
-  if (F.c3call) { say(L('Il telefono di Davide. Schermo nero. Sul retro, un adesivo: un occhio aperto.', "Davide's phone. Black screen. On the back, a sticker: an open eye.")); return; }
+  if (F.c3call) { flavor(L('Il telefono di Davide. Schermo nero. Sul retro, un adesivo: un occhio aperto.', "Davide's phone. Black screen. On the back, a sticker: an open eye.")); return; }
   F.c3callStart = true;
 }
 /* ---------- allestimento ---------- */
@@ -2669,7 +2688,8 @@ function checkInteract() {
   if (it && mode === 'explore') { const lbl = typeof it.label === 'function' ? it.label() : it.label; pr.innerHTML = isTouch ? esc(lbl) : `<b>E</b>${esc(lbl)}`; pr.style.opacity = 1; cr.classList.add('on'); $('#mUse').classList.add('on'); }
   else { pr.style.opacity = 0; cr.classList.remove('on'); $('#mUse').classList.remove('on'); }
 }
-function tryInteract() { if (mode !== 'explore' || !curIt) return; progress(); curIt.fn(); }
+let lastUse = 0;
+function tryInteract() { if (mode !== 'explore' || !curIt) return; const now = performance.now(); if (now - lastUse < 350) return; lastUse = now; progress(); curIt.fn(); }
 
 /* pausa / opzioni */
 function openPause() { if (mode !== 'explore') return; mode = 'pause'; unlockPointer(); $('#pauseObj').textContent = F.obj ? 'Obiettivo: ' + F.obj : ''; $('#pause').classList.remove('hidden'); }
@@ -2677,11 +2697,11 @@ function closePause() { $('#pause').classList.add('hidden'); mode = 'explore'; l
 $('#pRes').onclick = closePause; $('#pMenu').onclick = () => { $('#pause').classList.add('hidden'); toMenu(); };
 $('#pOpt').onclick = () => openOptions(); $('#bOpt').onclick = () => { initAudio(); openOptions(); };
 function openOptions() {
-  const o = $('#options'); o.classList.remove('hidden'); $('#oVol').value = save.vol; $('#oSens').value = save.sens;
+  const o = $('#options'); o.classList.remove('hidden'); $('#oVol').value = save.vol; $('#oRain').value = save.rain ?? 0.6; $('#oSens').value = save.sens;
   o.querySelectorAll('[data-lang]').forEach(b => { b.classList.toggle('on', b.dataset.lang === LANG); b.onclick = () => { if (b.dataset.lang === LANG) return; save.lang = b.dataset.lang; persist(); location.reload(); }; });
   o.querySelectorAll('[data-q]').forEach(b => { b.classList.toggle('on', b.dataset.q === save.quality); b.onclick = () => { save.quality = b.dataset.q; persist(); location.reload(); }; });
 }
-$('#oVol').oninput = e => setVol(+e.target.value); $('#oSens').oninput = e => { save.sens = +e.target.value; persist(); };
+$('#oVol').oninput = e => setVol(+e.target.value); $('#oRain').oninput = e => setRain(+e.target.value); $('#oSens').oninput = e => { save.sens = +e.target.value; persist(); };
 $('#oClose').onclick = () => $('#options').classList.add('hidden');
 document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => b.closest('.panel').classList.add('hidden'));
 $('#bEnds').onclick = () => { initAudio(); $('#endsList').innerHTML = CHAPTERS.filter(c => !c.soon).map(c => L(`<div style="font:800 10px Inter;letter-spacing:.25em;color:var(--red);margin:14px 0 4px">CAPITOLO ${c.n} — ${c.t.toUpperCase()}</div>`, `<div style="font:800 10px Inter;letter-spacing:.25em;color:var(--red);margin:14px 0 4px">CHAPTER ${c.n} — ${c.t.toUpperCase()}</div>`) + Object.entries(ENDINGS).filter(([, e]) => e.ch === c.n).map(([k, e]) => { const got = save.endings.includes(k); return `<div class="end ${got ? 'got' : ''}"><div class="q">${got ? '✓' : '?'}</div><div><b>${got ? e.t : '???'}</b><span>${got ? e.d : 'Non ancora scoperto.'}</span></div></div>`; }).join('')).join('') + L(`<p style="font-size:12px;color:#555;margin-top:14px">Alcuni finali si nascondono dove il narratore non vuole che tu vada.</p>`, `<p style="font-size:12px;color:#555;margin-top:14px">Some endings hide where the narrator doesn't want you to go.</p>`); $('#endsPanel').classList.remove('hidden'); };
@@ -2747,7 +2767,8 @@ function resetWorld() {
   W.d6Target = W.d6Ang = 0; W.dbTarget = W.dbAng = 0; W.self.visible = false; F.c3allYou = false; setLight('dav', false); setLight('dbath', false); drawDavMirror(false); if (W.c3sara) { scene.remove(W.c3sara); W.c3sara = null; }
 }
 function startGame(ch = 1) {
-  if (RUN) RUN.kill(); clearSubs(); CH = ch; resetWorld(); if (ch === 2) setupCh2(); if (ch === 3) setupCh3();
+  if (RUN) RUN.kill(); clearSubs(); CH = ch; resetWorld();
+  W.L.dav.light.visible = W.L.dbath.light.visible = ch === 3; W.L.tv.light.visible = ch === 2; if (ch === 2) setupCh2(); if (ch === 3) setupCh3();
   save.prevPlay = save.lastPlay || null; save.lastPlay = Date.now(); save.runs++; persist(); netProgress({ runs: save.runs, last: Date.now() });
   $('#menu').classList.add('hidden'); $('#hud').classList.remove('hidden'); if (isTouch) $('#mobile').classList.remove('hidden');
   $('#hint').style.opacity = 1; $('#hint').textContent = '';
@@ -2832,8 +2853,9 @@ function update(dt) {
   if (W.tvOn && frame % 3 === 0) drawTV();
   if (CH === 3) davTick(dt);
   if (OS.vid && OS.wins.vid && frame % 2 === 0) drawVid();
-  const needCam = (CH === 3 && P.z > 6.2) || (OS.open && (OS.lc || OS.wins.vid)) || (mode === 'explore' && Math.hypot(P.x - 2.4, P.z - 0.5) < 3.5);
-  if (needCam && frame % (HIGH ? 2 : 3) === 0) renderWebcam();
+  const camVisible = mode === 'explore' && (STREAM.live || OS.lcVisible) && P.x < 4.5 && P.z < 4 && Math.hypot(P.x - 2.4, P.z - 0.5) < 3.5;
+  const needCam = (CH === 3 && P.z > 6.2) || (OS.open && (OS.lc || OS.wins.vid)) || camVisible;
+  if (needCam && frame % (OS.open ? (HIGH ? 2 : 3) : 4) === 0) renderWebcam();
   if ((OS.lc || STREAM.live) && frame % 2 === 0) drawPreview(dt * 2);
   monT -= dt; if (monT <= 0) { monT = 0.25; drawMonitors(); }
   if (frame % 30 === 0) { $('#clock').textContent = gameClockStr(); const oc = $('#osClock'); if (oc) oc.innerHTML = `${gameClockStr()}<br>${REAL.dmy()}`; const pb = $('#phBatt'); if (pb) pb.textContent = REAL.batt != null ? `${REAL.charging ? '⚡' : '🔋'}${REAL.batt}%` : '🔋'; }
@@ -2875,6 +2897,7 @@ function loop() {
   requestAnimationFrame(loop);
   const dt = Math.min(clock.getDelta(), 0.05); frame++;
   update(dt);
+  if (SHADOWS && frame % 2 === 0) renderer.shadowMap.needsUpdate = true;
   if (!OS.open) renderer.render(scene, mode === 'peep' ? peepCam : camera);
   if (frame % 2 === 0) drawGrain();
 }
