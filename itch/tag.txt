@@ -1,0 +1,18 @@
+TAG (itch.io ne accetta fino a 10, inserirli uno per uno):
+horror
+psychological-horror
+creepypasta
+first-person
+3d
+story-rich
+multiple-endings
+atmospheric
+streaming
+italian
+
+GENERE: Interactive Fiction (in alternativa: Adventure)
+MADE WITH: Three.js, Electron
+LINGUE: English, Italian
+INPUT: Keyboard, Mouse, Touchscreen
+ACCESSIBILITÀ: Subtitles
+CONTENUTI: avvisi per contenuti horror / temi disturbanti (nessuna violenza esplicita)
