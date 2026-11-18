@@ -16,6 +16,7 @@ Stanotte fai la tua prima live. In chat compare **occhio_aperto**. Sa cose che s
 - 💬 **Una chat viva:** i nomi in chat sono di chi ha giocato prima di te, e i messaggi che lasci a fine capitolo compaiono nella diretta di qualcun altro.
 - 🏠 **Una casa da esplorare in 3D**, un PC con file, browser e una piattaforma di streaming, un telefono con messaggi e galleria.
 - 🎭 **Scelte che contano:** finali multipli in ogni capitolo, e le decisioni passano da un capitolo all'altro.
+- 📼 **Effetto VHS** da videocassetta consumata (si può spegnere nelle Opzioni), pioggia regolabile.
 - 🌐 **Italiano e inglese**, gioca dal browser (anche da telefono, in orizzontale), su Windows o Android. Funziona anche offline.
 
 ### Capitoli
@@ -28,6 +29,8 @@ Stanotte fai la tua prima live. In chat compare **occhio_aperto**. Sa cose che s
 **Sostieni il gioco:** con una donazione ricevi il **codice sostenitore** che sblocca i capitoli 4 e 5 (Menu → Capitoli) appena escono.
 
 🎧 Usa le cuffie. Spegni la luce.
+
+*Sviluppato da **AgonyApp Studio**.*
 
 ---
 
@@ -45,6 +48,7 @@ Tonight is your first stream. **occhio_aperto** joins the chat. He knows things 
 - 💬 **A living chat:** the names in the chat belong to people who played before you, and the message you leave at the end of a chapter appears in someone else's stream.
 - 🏠 **A 3D flat to explore**, a PC with files, a browser and a streaming app, a phone with messages and a photo gallery.
 - 🎭 **Choices that matter:** multiple endings in every chapter, and your decisions carry over.
+- 📼 **VHS effect** like a worn-out tape (can be turned off in Options), adjustable rain.
 - 🌐 **English and Italian**, play in the browser (phones too, in landscape), on Windows or Android. Works offline.
 
 ### Chapters
@@ -57,3 +61,5 @@ Tonight is your first stream. **occhio_aperto** joins the chat. He knows things 
 **Support the game:** donate to get the **supporter code** that unlocks chapters 4 and 5 (Menu → Chapters) as soon as they're out.
 
 🎧 Wear headphones. Turn off the lights.
+
+*Developed by **AgonyApp Studio**.*

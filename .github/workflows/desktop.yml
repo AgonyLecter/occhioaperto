@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ['index.html', 'icon-512.png', 'desktop/**', '.github/workflows/desktop.yml']
+    paths: ['index.html', 'icon-512.png', 'desktop/**', 'itch/**', 'screenshots/**', '.github/workflows/desktop.yml']
 
 permissions:
   contents: write
@@ -25,6 +25,18 @@ jobs:
       - name: Versione browser per itch.io (zip con index.html)
         shell: pwsh
         run: Compress-Archive -Path game/* -DestinationPath dist/OcchioAperto-Web.zip -Force
+      - name: Pacchetto completo per itch.io (senza il codice sostenitore)
+        shell: pwsh
+        run: |
+          $p = "pack/OcchioAperto-itch"
+          New-Item -ItemType Directory -Force "$p/1 - File da caricare", "$p/2 - Pagina itch/screenshot" | Out-Null
+          Copy-Item dist/OcchioAperto-Web.zip "$p/1 - File da caricare/"
+          Copy-Item (Get-ChildItem dist/OcchioAperto-*-win-x64.zip).FullName "$p/1 - File da caricare/OcchioAperto-Windows.zip"
+          Copy-Item ../itch/cover-it.png, ../itch/cover-en.png, ../itch/descrizione.md, ../itch/tag.txt "$p/2 - Pagina itch/"
+          Copy-Item ../icon-512.png "$p/2 - Pagina itch/icona-512.png"
+          Copy-Item ../screenshots/*.jpg "$p/2 - Pagina itch/screenshot/"
+          Copy-Item ../itch/README.md "$p/LEGGIMI.md"
+          Compress-Archive -Path pack/OcchioAperto-itch -DestinationPath dist/OcchioAperto-itch-pack.zip -Force
       - uses: actions/upload-artifact@v4
         with:
           name: OcchioAperto-Windows
@@ -42,7 +54,7 @@ jobs:
           cp OcchioAperto-*-win-x64.zip OcchioAperto-Windows.zip
           cp *-portable.exe OcchioAperto-Windows-portable.exe
           gh release delete windows --yes --cleanup-tag --repo "$GITHUB_REPOSITORY" || true
-          gh release create windows OcchioAperto-Windows.zip OcchioAperto-Windows-portable.exe OcchioAperto-Web.zip \
+          gh release create windows OcchioAperto-Windows.zip OcchioAperto-Windows-portable.exe OcchioAperto-Web.zip OcchioAperto-itch-pack.zip \
             --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --latest \
             --title "Occhio Aperto per Windows" \
             --notes "Versione Windows costruita automaticamente dal commit ${GITHUB_SHA::7}. Scarica lo zip, estrailo e avvia 'Occhio Aperto.exe'. Se Windows mostra SmartScreen: Ulteriori informazioni → Esegui comunque."

@@ -19,7 +19,7 @@ L'APK lo generi tu su PWABuilder (con la tua chiave): non è nella release.
 
 - **Kind of project:** HTML
 - **Classification:** Games — **Genre:** Interactive Fiction
-- **Title:** Occhio Aperto · **Short description:** "Un horror psicologico in cinque capitoli. / A psychological horror in five chapters."
+- **Title:** Occhio Aperto · **Studio:** AgonyApp Studio · **Short description:** "Un horror psicologico in cinque capitoli. / A psychological horror in five chapters."
 - **Cover image:** `cover-it.png` oppure `cover-en.png` (630×500)
 - **Screenshots:** i file in `../screenshots/`
 - **Description:** il testo di `descrizione.md` (italiano + inglese)
